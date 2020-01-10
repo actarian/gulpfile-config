@@ -1,0 +1,42 @@
+﻿{
+	"targets": {
+		"browser": {
+			"compile": [{
+				"input": "test/css/main.scss",
+				"output": "docs/css/main.css",
+				"minify": true
+			}, {
+				"input": "test/js/main.js",
+				"output": "docs/js/main.js",
+				"rollup": {
+					"output": {
+						"format": "umd"
+					}
+				},
+				"minify": true
+			}],
+			"bundle": []
+		},
+		"dist": {
+			"compile": [{
+				"input": "src/gulpfile-config.js",
+				"output": "dist/gulpfile-config.js",
+				"rollup": {
+					"output": {
+						"name": "gulpfile-config",
+						"format": "umd"
+					}
+				},
+				"minify": false
+			}],
+			"bundle": []
+		}
+	},
+	"tfs": false,
+	"server": {
+		"root": "./docs",
+		"path": "/gulpfile-config/",
+		"host": "localhost",
+		"port": 40000
+	}
+}

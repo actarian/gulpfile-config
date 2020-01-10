@@ -1,0 +1,1 @@
+{"version":3,"sources":["test/css/main.scss"],"names":[],"mappings":"AAGA,KACC,eAAgB,CAChB,UAAW","file":"docs/css/main.min.css","sourcesContent":["/**\n * main scss example\n */\nbody {\n\tbackground: #ccc;\n\tcolor: #333;\n}\n"]}
