@@ -3,7 +3,7 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
-## [1.0.0-alpha.1] - 2020-01-10
+## [1.0.0-alpha.2] - 2020-01-11
 ### Added
 - Initial release of gulpfile-config library
 

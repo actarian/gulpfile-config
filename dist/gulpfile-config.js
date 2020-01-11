@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.1
+ * @license gulpfile-config v1.0.0-alpha.2
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -519,8 +519,6 @@
 	};
 
 	var watch$2 = gulp.watch;
-	var path_ = './gulpfile-config.json';
-	var target = yargs.argv.target || 'browser';
 
 	try {
 	  // Fallback for Windows backs out of node_modules folder to root of project.
@@ -530,6 +528,9 @@
 	} catch (err) {
 	  logger.error("chdir: " + err);
 	}
+
+	var path_ = './gulpfile-config.json';
+	var target = (yargs.argv || yargs().argv).target || 'browser';
 
 	function getConfig() {
 	  var defaultTarget = {

@@ -7,9 +7,6 @@ const { watch } = require('gulp');
 
 const log = require('./logger');
 
-const path_ = './gulpfile-config.json';
-const target = yargs.argv.target || 'browser';
-
 try {
 	// Fallback for Windows backs out of node_modules folder to root of project.
 	process.env.PWD = process.env.PWD || path.resolve(process.cwd(), '../../../');
@@ -18,6 +15,9 @@ try {
 } catch (err) {
 	log.error(`chdir: ${err}`);
 }
+
+const path_ = './gulpfile-config.json';
+const target = (yargs.argv || yargs().argv).target || 'browser';
 
 function getConfig() {
 	const defaultTarget = {

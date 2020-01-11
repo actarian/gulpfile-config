@@ -114,5 +114,5 @@ Changelog [here](https://github.com/actarian/gulpfile-config/blob/master/CHANGEL
 
 ---
 
-## 1.0.0-alpha.1
+## 1.0.0-alpha.2
 * Initial release of gulpfile-config library

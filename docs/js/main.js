@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.1
+ * @license gulpfile-config v1.0.0-alpha.2
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
