@@ -1,14 +1,14 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.2
+ * @license gulpfile-config v1.0.0-alpha.3
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('gulp-connect'), require('gulp'), require('ansi-gray'), require('color-support'), require('console'), require('parse-node-version'), require('time-stamp'), require('gulp-autoprefixer'), require('@babel/preset-env'), require('browserify'), require('cssnano'), require('gulp-filter'), require('gulp-if'), require('path'), require('gulp-plumber'), require('gulp-postcss'), require('gulp-rename'), require('gulp-better-rollup'), require('gulp-sass'), require('gulp-terser'), require('through2'), require('rollup-plugin-babel'), require('@rollup/plugin-commonjs'), require('rollup-plugin-license'), require('@rollup/plugin-node-resolve'), require('tsify'), require('fs'), require('tfs'), require('gulp-concat'), require('process'), require('yargs')) :
-	typeof define === 'function' && define.amd ? define('gulpfile-config', ['exports', 'gulp-connect', 'gulp', 'ansi-gray', 'color-support', 'console', 'parse-node-version', 'time-stamp', 'gulp-autoprefixer', '@babel/preset-env', 'browserify', 'cssnano', 'gulp-filter', 'gulp-if', 'path', 'gulp-plumber', 'gulp-postcss', 'gulp-rename', 'gulp-better-rollup', 'gulp-sass', 'gulp-terser', 'through2', 'rollup-plugin-babel', '@rollup/plugin-commonjs', 'rollup-plugin-license', '@rollup/plugin-node-resolve', 'tsify', 'fs', 'tfs', 'gulp-concat', 'process', 'yargs'], factory) :
-	(global = global || self, factory(global['gulpfile-config'] = {}, global.gulpConnect, global.gulp, global.ansiGray, global.colorSupport, global.console$2, global.parseNodeVersion, global.timeStamp, global.gulpAutoprefixer, global.presetEnv, global.browserify, global.cssnano, global.gulpFilter, global.gulpIf, global.path, global.gulpPlumber, global.gulpPostcss, global.gulpRename, global.gulpBetterRollup, global.gulpSass, global.gulpTerser, global.through2, global.rollupPluginBabel, global.pluginCommonjs, global.rollupPluginLicense, global.pluginNodeResolve, global.tsify, global.fs, global.tfs, global.gulpConcat, global.process$1, global.yargs));
-}(this, (function (exports, gulpConnect, gulp, ansiGray, colorSupport, console$2, parseNodeVersion, timeStamp, gulpAutoprefixer, presetEnv, browserify, cssnano, gulpFilter, gulpIf, path, gulpPlumber, gulpPostcss, gulpRename, gulpBetterRollup, gulpSass, gulpTerser, through2, rollupPluginBabel, pluginCommonjs, rollupPluginLicense, pluginNodeResolve, tsify, fs, tfs, gulpConcat, process$1, yargs) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('gulp-connect'), require('gulp'), require('ansi-gray'), require('color-support'), require('console'), require('parse-node-version'), require('time-stamp'), require('gulp-autoprefixer'), require('@babel/preset-env'), require('browserify'), require('cssnano'), require('gulp-filter'), require('gulp-if'), require('path'), require('gulp-plumber'), require('gulp-postcss'), require('gulp-rename'), require('gulp-better-rollup'), require('gulp-sass'), require('gulp-terser'), require('through2'), require('rollup-plugin-babel'), require('@rollup/plugin-commonjs'), require('rollup-plugin-license'), require('@rollup/plugin-node-resolve'), require('tsify'), require('fs'), require('tfs'), require('gulp-concat'), require('process')) :
+	typeof define === 'function' && define.amd ? define('gulpfile-config', ['exports', 'gulp-connect', 'gulp', 'ansi-gray', 'color-support', 'console', 'parse-node-version', 'time-stamp', 'gulp-autoprefixer', '@babel/preset-env', 'browserify', 'cssnano', 'gulp-filter', 'gulp-if', 'path', 'gulp-plumber', 'gulp-postcss', 'gulp-rename', 'gulp-better-rollup', 'gulp-sass', 'gulp-terser', 'through2', 'rollup-plugin-babel', '@rollup/plugin-commonjs', 'rollup-plugin-license', '@rollup/plugin-node-resolve', 'tsify', 'fs', 'tfs', 'gulp-concat', 'process'], factory) :
+	(global = global || self, factory(global['gulpfile-config'] = {}, global.gulpConnect, global.gulp, global.ansiGray, global.colorSupport, global.console$2, global.parseNodeVersion, global.timeStamp, global.gulpAutoprefixer, global.presetEnv, global.browserify, global.cssnano, global.gulpFilter, global.gulpIf, global.path, global.gulpPlumber, global.gulpPostcss, global.gulpRename, global.gulpBetterRollup, global.gulpSass, global.gulpTerser, global.through2, global.rollupPluginBabel, global.pluginCommonjs, global.rollupPluginLicense, global.pluginNodeResolve, global.tsify, global.fs, global.tfs, global.gulpConcat, global.process$1));
+}(this, (function (exports, gulpConnect, gulp, ansiGray, colorSupport, console$2, parseNodeVersion, timeStamp, gulpAutoprefixer, presetEnv, browserify, cssnano, gulpFilter, gulpIf, path, gulpPlumber, gulpPostcss, gulpRename, gulpBetterRollup, gulpSass, gulpTerser, through2, rollupPluginBabel, pluginCommonjs, rollupPluginLicense, pluginNodeResolve, tsify, fs, tfs, gulpConcat, process$1) { 'use strict';
 
 	gulpConnect = gulpConnect && gulpConnect.hasOwnProperty('default') ? gulpConnect['default'] : gulpConnect;
 	gulp = gulp && gulp.hasOwnProperty('default') ? gulp['default'] : gulp;
@@ -40,7 +40,6 @@
 	tfs = tfs && tfs.hasOwnProperty('default') ? tfs['default'] : tfs;
 	gulpConcat = gulpConcat && gulpConcat.hasOwnProperty('default') ? gulpConcat['default'] : gulpConcat;
 	process$1 = process$1 && process$1.hasOwnProperty('default') ? process$1['default'] : process$1;
-	yargs = yargs && yargs.hasOwnProperty('default') ? yargs['default'] : yargs;
 
 	var Console = console$2.Console;
 	var nodeVersion = parseNodeVersion(process.version);
@@ -530,7 +529,35 @@
 	}
 
 	var path_ = './gulpfile-config.json';
-	var target = (yargs.argv || yargs().argv).target || 'browser';
+	var options = getOptions();
+	var target = options.target || 'browser';
+
+	function getOptions() {
+	  var key = undefined;
+	  var o = process$1.argv.reduce(function (p, c, a) {
+	    var k, v;
+
+	    if (c.indexOf('--') === 0) {
+	      k = c.substr(2);
+	    } else {
+	      v = c;
+	    }
+
+	    if (key) {
+	      p[key] = v === undefined ? true : v;
+	      key = undefined;
+	    }
+
+	    key = k;
+	    return p;
+	  }, {});
+
+	  if (key) {
+	    o[key] = true;
+	  }
+
+	  return o;
+	}
 
 	function getConfig() {
 	  var defaultTarget = {

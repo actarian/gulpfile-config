@@ -2,7 +2,7 @@
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
 	"name": "gulpfile-config",
 	"description": "Gulp bundler utility with gulpfile-config.json",
-	"version": "1.0.0-alpha.2",
+	"version": "1.0.0-alpha.3",
 	"main": "dist/gulpfile-config.js",
 	"license": "MIT",
 	"keywords": [
@@ -64,7 +64,6 @@
 		"through2": "~3.0.1",
 		"time-stamp": "~2.2.0",
 		"tsify": "~4.0.1",
-		"typescript": "~3.7.4",
-		"yargs": "~15.1.0"
+		"typescript": "~3.7.4"
 	}
 }

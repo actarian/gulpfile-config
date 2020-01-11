@@ -1,7 +1,6 @@
 const fs = require('fs'),
 	path = require('path'),
-	process = require('process'),
-	yargs = require('yargs');
+	process = require('process');
 
 const { watch } = require('gulp');
 
@@ -17,7 +16,30 @@ try {
 }
 
 const path_ = './gulpfile-config.json';
-const target = (yargs.argv || yargs().argv).target || 'browser';
+const options = getOptions();
+const target = options.target || 'browser';
+
+function getOptions() {
+	let key = undefined;
+	const o = process.argv.reduce((p, c, a) => {
+		let k, v;
+		if (c.indexOf('--') === 0) {
+			k = c.substr(2);
+		} else {
+			v = c;
+		}
+		if (key) {
+			p[key] = (v === undefined ? true : v);
+			key = undefined;
+		}
+		key = k;
+		return p;
+	}, {});
+	if (key) {
+		o[key] = true;
+	}
+	return o;
+}
 
 function getConfig() {
 	const defaultTarget = {
