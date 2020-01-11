@@ -2,6 +2,8 @@
 
 [![Licence](https://img.shields.io/github/license/actarian/gulpfile-config.svg)](https://github.com/actarian/gulpfile-config)
 
+Gulp bundler utility with `gulpfile-config.json`
+
 ___
 
 #### [Gulp CLI](https://github.com/angular/angular-cli) version 4.0.0 +
