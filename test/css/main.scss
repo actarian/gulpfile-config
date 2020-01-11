@@ -1,7 +1,4 @@
-/**
- * main scss example
- */
-body {
-	background: #ccc;
-	color: #333;
-}
+@import '_variables/main';
+@import '_variables/shared';
+@import '_variables/grid';
+@import 'shared';
