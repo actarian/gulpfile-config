@@ -158,7 +158,6 @@ button,
     color: #fff;
     border-color: #003adc;
     background: #003adc;
-    -webkit-transition: all ease-in-out .2s;
     transition: all ease-in-out .2s; }
   .btn--primary span {
     display: inline-block;
@@ -168,7 +167,6 @@ button,
     color: #003adc;
     border: 2px solid #003adc;
     border-radius: 500px;
-    -webkit-transition: all ease-in-out .2s;
     transition: all ease-in-out .2s;
     font-family: "Open Sans", sans-serif; }
   .btn--primary b {
@@ -209,7 +207,6 @@ button,
       display: block; } }
 
 .group--form {
-  display: -webkit-box;
   display: flex;
   padding: 10px 20px; }
 
@@ -260,28 +257,21 @@ button,
   font-family: "Open Sans", sans-serif; }
 
 .page {
-  display: -webkit-box;
   display: flex;
-  -webkit-box-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-          justify-content: center; }
+  align-items: center;
+  justify-content: center; }
   .page main {
     width: 100%;
     padding: 0; }
   .page .header {
-    -webkit-box-flex: 0;
-            flex: 0 0 75px;
-    display: -webkit-box;
+    flex: 0 0 75px;
     display: flex;
-    -webkit-box-align: center;
-            align-items: center;
+    align-items: center;
     padding: 20px; }
     .page .header .brand {
       font-size: 13px;
       font-weight: 900;
-      -webkit-box-flex: 1;
-              flex: 1 1 auto; }
+      flex: 1 1 auto; }
     .page .header .btn--twitter,
     .page .header .btn--github {
       font-size: 20px;
@@ -289,7 +279,6 @@ button,
       .page .header .btn--twitter i,
       .page .header .btn--github i {
         color: #212121;
-        -webkit-transition: ease-in-out color 300ms;
         transition: ease-in-out color 300ms; }
       .page .header .btn--twitter:hover i,
       .page .header .btn--github:hover i {
@@ -300,11 +289,8 @@ button,
     .page {
       background: #e0e0e0; }
       .page main {
-        display: -webkit-box;
         display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-                flex-direction: column;
+        flex-direction: column;
         max-width: 375px;
         height: 70vh;
         border-radius: 3px;

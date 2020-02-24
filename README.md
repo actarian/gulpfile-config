@@ -4,35 +4,87 @@
 
 Gulp bundler utility with `gulpfile-config.json`
 
+## Requirements
+
+### [NodeJs](https://nodejs.org/it/)
+```
+node.js -v
+```
 ___
 
-#### [Gulp CLI](https://github.com/angular/angular-cli) version 4.0.0 +
-* `npm install gulp-cli -g`  
+### [Npm](https://www.npmjs.com/)
+```
+npm -v
+```
+___
+### Updating Npm on Mac
+```
+npm install npm@latest -g
+```
+___
+### Updating Npm on Windows
+[npm-windows-upgrade](https://www.npmjs.com/package/npm-windows-upgrade) 
+___
+
+### [Gulp CLI](https://github.com/angular/angular-cli) version 4.0.0
+```
+npm install gulp-cli -g
+```
+___
+
+### Install packages
+```
+npm install
+```
+___
+
+### Build, Serve & Watch 
+```
+gulp
+```
 
 ___
 
-## Install packages
-
-* `npm install`
-
+### Build Only
+```
+gulp build
+```
 ___
 
-## Build, Serve & Watch 
-
-* `gulp`
-
+### Build & Watch 
+```
+gulp start
+```
 ___
 
-## Build Only
-
-* `gulp build`
-
+### Build Js Only
+```
+gulp buildJs
+```
 ___
 
-## Build Specific Target
+### Build Js & Watch 
+```
+gulp startJs
+```
+___
 
-* `gulp build --target dist`
+### Build Css Only
+```
+gulp buildCss
+```
+___
 
+### Build Css & Watch 
+```
+gulp startCss
+```
+___
+
+### Build Specific Target
+```
+gulp build --target dist
+```
 ___
 
 ## Configuration
@@ -47,24 +99,38 @@ ___
 
 > gulpfile-config.json
 
-```bash
-├── targets
-│   ├── browser
-│   │   ├── compile
-│   │   │   ├── bootstrap.scss
-│   │   │   ├── main.scss
-│   │   │   └── main.js
-│   │   └── bundle
-│   │       ├── vendors.css
-│   │       └── vendors.js
-│   └── dist
-│       └── ...
-├── tfs: false
-└── server
-	├── root: './docs',
-	├── path: '/project/'
-	├── host: 'localhost'
-	└── port: 40000
+```json
+{
+	"targets": {
+		"browser": {
+			"compile": [{
+				"input": "test/css/main.scss",
+				"output": "docs/css/main.css",
+				"minify": true
+			}, {
+				"input": "test/js/main.js",
+				"output": "docs/js/main.js",
+				"minify": true
+			}],
+			"bundle": []
+		},
+		"dist": {
+			"compile": [{
+				"input": "src/gulpfile-config.js",
+				"output": "dist/gulpfile-config.js",
+				"minify": false
+			}],
+			"bundle": []
+		}
+	},
+	"server": {
+		"root": "./docs",
+		"path": "/gulpfile-config/",
+		"host": "localhost",
+		"port": 34999
+	},
+	"tfs": false
+}
 ```
 ___
 ## Contributing
@@ -113,6 +179,3 @@ ___
 Changelog [here](https://github.com/actarian/gulpfile-config/blob/master/CHANGELOG.md).
 
 ---
-
-## 1.0.0-alpha.3
-* Initial release of gulpfile-config library
