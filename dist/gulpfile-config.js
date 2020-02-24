@@ -931,7 +931,9 @@ function typescriptInput(item) {
     rollupCommonJSResolveHack: true,
     clean: true,
     declaration: true
-  }) : null, pluginCommonjs(), rollupPluginLicense({
+  }) : null, pluginCommonjs({
+    exclude: ['node_modules/**']
+  }), rollupPluginLicense({
     banner: "@license <%= pkg.name %> v<%= pkg.version %>\n\t\t\t(c) <%= moment().format('YYYY') %> <%= pkg.author %>\n\t\t\tLicense: <%= pkg.license %>"
   })].filter(function (x) {
     return x;
