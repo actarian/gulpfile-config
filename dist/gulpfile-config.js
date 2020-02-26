@@ -35,12 +35,14 @@ var through2 = _interopDefault(require('through2'));
 var nodeSass = _interopDefault(require('node-sass'));
 var vinyl = _interopDefault(require('vinyl'));
 var vinylSourcemapsApply = _interopDefault(require('vinyl-sourcemaps-apply'));
-var core = _interopDefault(require('@babel/core'));
 var rollup$2 = _interopDefault(require('rollup'));
+var rollupPluginMjml = _interopDefault(require('rollup-plugin-mjml'));
+var core = _interopDefault(require('@babel/core'));
 var rollupPluginBabel = _interopDefault(require('rollup-plugin-babel'));
 var pluginCommonjs = _interopDefault(require('@rollup/plugin-commonjs'));
 var rollupPluginSourcemaps = _interopDefault(require('rollup-plugin-sourcemaps'));
 var rollupPluginLicense = _interopDefault(require('rollup-plugin-license'));
+require('@rollup/plugin-node-resolve');
 var rollupPluginTypescript2 = _interopDefault(require('rollup-plugin-typescript2'));
 var typescript$1 = _interopDefault(require('typescript'));
 var gulpConcat = _interopDefault(require('gulp-concat'));
@@ -49,11 +51,16 @@ var url = _interopDefault(require('url'));
 var consoleConsole = console$2.Console;
 var nodeVersion = parseNodeVersion(process.version);
 var colorDetectionOptions = {
+  // If on Windows, ignore the isTTY check
+  // This is due to AppVeyor (and thus probably common Windows platforms?) failing the check
+  // TODO: If this is too broad, we can reduce it to an APPVEYOR env check
   ignoreTTY: process.platform === 'win32'
-};
+}; // Needed to add this because node 10 decided to start coloring log output randomly
+
 var console$1;
 
 if (nodeVersion.major >= 10) {
+  // Node 10 also changed the way this is constructed
   console$1 = new consoleConsole({
     stdout: process.stdout,
     stderr: process.stderr,
@@ -71,6 +78,7 @@ var palette = {
   Blink: '\x1b[5m',
   Reverse: '\x1b[7m',
   Hidden: '\x1b[8m',
+  //
   FgBlack: '\x1b[30m',
   FgRed: '\x1b[31m',
   FgGreen: '\x1b[32m',
@@ -79,6 +87,7 @@ var palette = {
   FgMagenta: '\x1b[35m',
   FgCyan: '\x1b[36m',
   FgWhite: '\x1b[37m',
+  //
   BgBlack: '\x1b[40m',
   BgRed: '\x1b[41m',
   BgGreen: '\x1b[42m',
@@ -182,9 +191,11 @@ var entries = {};
 var cwd = process.cwd();
 
 function setEntry(entry, imports) {
+  // console.log(entry, imports);
   entry = entry.replace(cwd, '');
 
   if (typeof imports === 'string') {
+    //
     entries[entry] = imports;
   } else if (imports) {
     imports = Array.isArray(imports) ? imports : [imports];
@@ -192,7 +203,8 @@ function setEntry(entry, imports) {
       return x.replace(cwd, '');
     });
     entries[entry] = imports;
-  }
+  } // log('watch', entry, imports);
+
 }
 
 var watcher;
@@ -204,7 +216,7 @@ function watchEntries(callback) {
 
   var complete;
   watcher = watch(['**/*.*', '!node_modules/**/*.*'], function watch(done) {
-    complete = done;
+    complete = done; // console.log('done');
   }).on('change', function (path_) {
     var entry = Object.keys(entries).reduce(function (p, key) {
       var imports = entries[key];
@@ -223,6 +235,7 @@ function watchEntries(callback) {
         }
       } else {
         var found = imports.find(function (i) {
+          // console.log(i, path_);
           return i.indexOf(path_) !== -1;
         }) || key.indexOf(path_) !== -1;
 
@@ -235,13 +248,16 @@ function watchEntries(callback) {
     }, null);
 
     if (entry) {
+      // console.log('entry', entry);
+      // log('watch.changed', path_, '>', entry);
       if (typeof callback === 'function') {
         callback(path_, entry, complete);
       }
     } else {
       if (typeof complete === 'function') {
         return complete();
-      }
+      } // console.log('change');
+
     }
   });
 }
@@ -386,6 +402,22 @@ function getConfig() {
   service.config.tfs = config.tfs;
   return config;
 }
+/*
+function configWatcher(callback) {
+	const configWatch = watch(CONFIG_PATH, function config(done) {
+		// config = getConfig();
+		if (typeof callback === 'function') {
+			return callback(done);
+		}
+	}).on('change', logWatch);
+	return [configWatch];
+}
+
+function logWatch(path, stats) {
+	log('Changed', path);
+}
+*/
+
 
 var config = {
   CONFIG_PATH: CONFIG_PATH,
@@ -398,6 +430,7 @@ var service$1 = config.service;
 
 function tfsCheckout(skip) {
   return gulpIf(!skip && service$1.config.tfs, through2.obj(function (file, enc, callback) {
+    // console.log('TfsCheckout', file.path);
     if (fs.existsSync(file.path)) {
       var paths = [file.path];
 
@@ -428,6 +461,7 @@ var setEntry$1 = watch_1.setEntry;
 function sass(options, sync) {
   options = Object.assign({}, options);
   return through2.obj(function (file, enc, callback) {
+    // eslint-disable-line consistent-return
     if (file.isNull()) {
       return callback(null, file);
     }
@@ -444,16 +478,19 @@ function sass(options, sync) {
     }
 
     if (!file.contents.length) {
-      file.path = replaceExtension(file.path, '.css');
+      file.path = replaceExtension(file.path, '.css'); // eslint-disable-line no-param-reassign
+
       return callback(null, file);
     }
 
-    options.data = file.contents.toString();
-    options.file = file.path;
+    options.data = file.contents.toString(); // we set the file path here so that libsass can correctly resolve import paths
+
+    options.file = file.path; // Ensure `indentedSyntax` is true if a `.sass` file
 
     if (path.extname(file.path) === '.sass') {
       options.indentedSyntax = true;
-    }
+    } // Ensure file's parent directory in the include path
+
 
     if (options.includePaths) {
       if (typeof options.includePaths === 'string') {
@@ -463,7 +500,7 @@ function sass(options, sync) {
       options.includePaths = [];
     }
 
-    options.includePaths.unshift(path.dirname(file.path));
+    options.includePaths.unshift(path.dirname(file.path)); // Generate Source Maps if plugin source-map present
 
     if (file.sourceMap) {
       options.sourceMap = file.path;
@@ -476,37 +513,49 @@ function sass(options, sync) {
       var sassMapFile;
       var sassFileSrc;
       var sassFileSrcPath;
-      var sourceFileIndex;
+      var sourceFileIndex; // Build Source Maps!
 
       if (sassObj.map) {
-        sassMap = JSON.parse(sassObj.map.toString());
-        sassMapFile = sassMap.file.replace(/^stdout$/, 'stdin');
-        sassFileSrc = file.relative;
+        // Transform map into JSON
+        sassMap = JSON.parse(sassObj.map.toString()); // Grab the stdout and transform it into stdin
+
+        sassMapFile = sassMap.file.replace(/^stdout$/, 'stdin'); // Grab the base file name that's being worked on
+
+        sassFileSrc = file.relative; // Grab the path portion of the file that's being worked on
+
         sassFileSrcPath = path.dirname(sassFileSrc);
 
         if (sassFileSrcPath) {
+          // Prepend the path to all files in the sources array except the file that's being worked on
           sourceFileIndex = sassMap.sources.indexOf(sassMapFile);
           sassMap.sources = sassMap.sources.map(function (source, index) {
+            // eslint-disable-line arrow-body-style
             return index === sourceFileIndex ? source : path.join(sassFileSrcPath, source);
           });
-        }
+        } // Remove 'stdin' from souces and replace with filenames!
+
 
         sassMap.sources = sassMap.sources.filter(function (src) {
           return src !== 'stdin' && src;
-        });
-        sassMap.file = replaceExtension(sassFileSrc, '.css');
+        }); // Replace the map file with the original file name (but new extension)
+
+        sassMap.file = replaceExtension(sassFileSrc, '.css'); // Apply the map
+
         vinylSourcemapsApply(file, sassMap);
       }
 
-      file.contents = sassObj.css;
-      file.path = replaceExtension(file.path, '.css');
+      file.contents = sassObj.css; // eslint-disable-line no-param-reassign
+
+      file.path = replaceExtension(file.path, '.css'); // eslint-disable-line no-param-reassign
+
       callback(null, file);
     };
 
     if (sync !== true) {
       var _callback = function _callback(error, object) {
+        // eslint-disable-line consistent-return
         if (error) {
-          return logger.error('sass', error);
+          return logger.error('sass', error); // return callback(null, null);
         }
 
         setEntry$1(input, object.stats.includedFiles);
@@ -520,7 +569,7 @@ function sass(options, sync) {
         setEntry$1(input, object.stats.includedFiles);
         filePush(object);
       } catch (error) {
-        return logger.error('sass', error);
+        return logger.error('sass', error); // return callback(null, null);
       }
     }
   });
@@ -538,14 +587,195 @@ function replaceExtension(filePath, ext) {
   });
   return filePath;
 }
+/*
+
+const errorM = (error) => {
+	const filePath = (error.file === 'stdin' ? file.path : error.file) || file.path;
+	const relativePath = path.relative(process.cwd(), filePath);
+	const message = [chalk.underline(relativePath), error.formatted].join('\n');
+
+	error.messageFormatted = message; // eslint-disable-line no-param-reassign
+	error.messageOriginal = error.message; // eslint-disable-line no-param-reassign
+	error.message = stripAnsi(message); // eslint-disable-line no-param-reassign
+	error.relativePath = relativePath; // eslint-disable-line no-param-reassign
+
+	return callback(new pluginError('sass', error));
+};
+
+sass.logError = function logError(error) {
+	const message = new pluginError('sass', error.messageFormatted).toString();
+	process.stderr.write(`${message}\n`);
+	this.emit('end');
+};
+*/
+
 
 var sass_1 = {
   sass: sass
 };
 
-var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS;
 var setEntry$2 = watch_1.setEntry;
 var rollupCache = new Map();
+
+function mjml(item) {
+  return through2.obj(function (file, enc, callback) {
+    var _this = this;
+
+    if (file.isNull()) {
+      return callback(null, file);
+    }
+
+    if (file.isStream()) {
+      logger.error('mjml', 'streaming not supported');
+      return callback(null, file);
+    }
+
+    var inputOptions = mjmlInput(item, file.path);
+
+    if (inputOptions.cache !== false) {
+      inputOptions.cache = rollupCache.get(inputOptions.input);
+    }
+
+    var rollupGenerate = function rollupGenerate(bundle, output, i) {
+      return bundle.generate(output).then(function (result) {
+        if (!result) {
+          return;
+        }
+
+        var out = result.output.find(function (x) {
+          return x.isAsset;
+        });
+        var newFilePath = path.format({
+          dir: path.dirname(output.file),
+          name: path.basename(file.path, path.extname(file.path)),
+          ext: '.html'
+        });
+        var targetFile;
+
+        if (i > 0) {
+          var newFile = new vinyl({
+            cwd: file.cwd,
+            base: file.base,
+            path: newFilePath,
+            stat: {
+              isFile: function isFile() {
+                return true;
+              },
+              isDirectory: function isDirectory() {
+                return false;
+              },
+              isBlockDevice: function isBlockDevice() {
+                return false;
+              },
+              isCharacterDevice: function isCharacterDevice() {
+                return false;
+              },
+              isSymbolicLink: function isSymbolicLink() {
+                return false;
+              },
+              isFIFO: function isFIFO() {
+                return false;
+              },
+              isSocket: function isSocket() {
+                return false;
+              }
+            }
+          });
+          targetFile = newFile;
+        } else {
+          file.path = newFilePath;
+          targetFile = file;
+        }
+
+        targetFile.contents = Buffer.from(out.source);
+
+        if (i > 0) {
+          _this.push(targetFile);
+        }
+
+        return result;
+      })["catch"](function (error) {
+        logger.error('mjml', error);
+      });
+    };
+
+    rollup$2.rollup(inputOptions).then(function (bundle) {
+      var outputs = mjmlOutput(item);
+
+      if (inputOptions.cache !== false) {
+        rollupCache.set(inputOptions.input, bundle);
+      }
+
+      return Promise.all(outputs.map(function (output, i) {
+        return rollupGenerate(bundle, output, i);
+      }));
+    }).then(function (results) {
+      results.forEach(function (x) {
+        var outputs = x.output;
+        outputs.forEach(function (x) {
+          setEntry$2(inputOptions.input, [inputOptions.input]);
+        });
+      });
+      callback(null, file);
+    })["catch"](function (error) {
+      logger.error('mjml', error);
+
+      if (inputOptions.cache !== false) {
+        rollupCache["delete"](inputOptions.input);
+      }
+
+      throw error;
+    });
+  });
+}
+
+function mjmlInput(item, path) {
+  var plugins = [rollupPluginMjml({
+    keepComments: item.minify ? false : true,
+    minify: item.minify ? true : false,
+    beautify: item.minify ? false : true // validationLevel: item.validationLevel || 'strict',
+
+  })].filter(function (x) {
+    return x;
+  });
+  var input = {
+    input: path,
+    plugins: plugins,
+    cache: false
+  };
+  return input;
+}
+
+function mjmlOutput(item) {
+  var input = item.input;
+  var output = item.output;
+  var outputs = Array.isArray(output) ? output : [output];
+  var default_ = {
+    minify: item.minify || false
+  };
+  return outputs.map(function (x) {
+    var output = Object.assign({}, default_);
+
+    if (typeof x === 'string') {
+      output.file = x;
+    } else if (typeof x === 'object') {
+      output = Object.assign(output, x);
+    }
+
+    return output;
+  });
+}
+
+var mjml_1 = {
+  mjml: mjml,
+  mjmlInput: mjmlInput,
+  mjmlOutput: mjmlOutput
+};
+
+var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS;
+var setEntry$3 = watch_1.setEntry; // map object storing rollup cache objects for each input file
+
+var rollupCache$1 = new Map();
 
 function rollup_(item) {
   return through2.obj(function (file, enc, callback) {
@@ -560,10 +790,11 @@ function rollup_(item) {
       return callback(null, file);
     }
 
-    var inputOptions = rollupInput(item);
+    var inputOptions = rollupInput(item); // caching is enabled by default because of the nature of gulp and the watching/recompilatin
+    // but can be disabled by setting 'cache' to false
 
     if (inputOptions.cache !== false) {
-      inputOptions.cache = rollupCache.get(inputOptions.input);
+      inputOptions.cache = rollupCache$1.get(inputOptions.input);
     }
 
     var maps = file.sourceMap !== undefined;
@@ -615,16 +846,19 @@ function rollup_(item) {
           targetFile = file;
         }
 
-        var generated = result.output[0];
+        var generated = result.output[0]; // Pass sourcemap content and metadata to gulp-sourcemaps plugin to handle
+        // destination (and custom name) was given, possibly multiple output bundles.
 
         if (maps) {
           generated.map.file = path.relative(originalCwd, originalPath);
           generated.map.sources = generated.map.sources.map(function (source) {
             return path.relative(originalCwd, source);
           });
-        }
+        } // console.log(generated.map.file);
+        // return bundled file as buffer
 
-        targetFile.contents = Buffer.from(generated.code);
+
+        targetFile.contents = Buffer.from(generated.code); // apply sourcemap to output file
 
         if (maps) {
           vinylSourcemapsApply(targetFile, generated.map);
@@ -641,28 +875,29 @@ function rollup_(item) {
     };
 
     rollup$2.rollup(inputOptions).then(function (bundle) {
-      var outputs = rollupOutput(item);
+      // console.log(bundle);
+      var outputs = rollupOutput(item); // console.log(outputs);
 
       if (inputOptions.cache !== false) {
-        rollupCache.set(inputOptions.input, bundle);
+        rollupCache$1.set(inputOptions.input, bundle);
       }
 
       return Promise.all(outputs.map(function (output, i) {
         return rollupGenerate(bundle, output, i);
-      }));
+      })); // return bundle.write(outputs);
     }).then(function (results) {
       results.forEach(function (x) {
         var outputs = x.output;
         outputs.forEach(function (x) {
-          setEntry$2(inputOptions.input, Object.keys(x.modules));
+          setEntry$3(inputOptions.input, Object.keys(x.modules));
         });
       });
-      callback(null, file);
+      callback(null, file); // pass file to gulp and end stream
     })["catch"](function (error) {
       logger.error('rollup', error);
 
       if (inputOptions.cache !== false) {
-        rollupCache["delete"](inputOptions.input);
+        rollupCache$1["delete"](inputOptions.input);
       }
 
       throw error;
@@ -682,9 +917,10 @@ function rollupInput(item) {
     };
   } else {
     if (item.target) {
-      presetEnvOptions.targets = item.target;
+      presetEnvOptions.targets = item.target; // || 'last 2 version, ie 11'; // readed from .browserslistrc
     }
-  }
+  } // console.log(item.output.file, item.output, item.target, presetEnvOptions);
+
 
   var tsconfigDefaults = {
     compilerOptions: {
@@ -694,7 +930,7 @@ function rollupInput(item) {
       allowJs: true,
       declaration: false,
       sourceMap: true,
-      removeComments: true
+      removeComments: item.output.format === 'iife'
     },
     exclude: ['./node_modules/*', '.npm']
   };
@@ -706,13 +942,26 @@ function rollupInput(item) {
       allowJs: true,
       declaration: false,
       sourceMap: true,
-      removeComments: true
+      removeComments: item.output.format === 'iife'
     },
     exclude: ['./node_modules/*', '.npm']
-  };
-  var plugins = [rollupPluginSourcemaps(), pluginCommonjs({
+  }; // const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
+  // console.log('watchGlob', watchGlob);
+
+  var plugins = [// Resolve source maps to the original source
+  rollupPluginSourcemaps(),
+  /*
+  // Allow node_modules resolution, so you can use 'external' to control
+  // which external modules to include in the bundle
+  // https://github.com/rollup/rollup-plugin-node-resolve#usage
+  // import node modules
+  rollupPluginNodeResolve(),
+  */
+  // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
+  pluginCommonjs({
     exclude: ['node_modules/**']
-  }), path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
+  }), // Compile TypeScript files
+  path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
     typescript: typescript$1,
     tsconfigDefaults: tsconfigDefaults,
     tsconfig: 'tsconfig.json',
@@ -722,10 +971,14 @@ function rollupInput(item) {
     check: false
   }) : null, rollupPluginBabel({
     extensions: [].concat(DEFAULT_EXTENSIONS, ['.ts', '.tsx']),
-    presets: [['@babel/preset-env', presetEnvOptions]],
+    presets: [['@babel/preset-env', presetEnvOptions] // ['@babel/preset-typescript', { modules: false, loose: true }]
+    ],
     plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
     exclude: 'node_modules/**',
-    comments: false
+    // only transpile our source code
+    comments: item.output.format !== 'iife' // babelHelpers: 'bundled', // only for version 5
+    // babelrc: false,
+
   }), rollupPluginLicense({
     banner: "@license <%= pkg.name %> v<%= pkg.version %>\n\t\t\t(c) <%= moment().format('YYYY') %> <%= pkg.author %>\n\t\t\tLicense: <%= pkg.license %>"
   })].filter(function (x) {
@@ -736,7 +989,14 @@ function rollupInput(item) {
     plugins: plugins,
     external: item.external || [],
     cache: false,
+    // !! break babel if true
     treeshake: true
+    /*
+    watch: {
+    	include: watchGlob,
+    },
+    */
+
   };
   return input;
 }
@@ -775,6 +1035,20 @@ var rollup_1 = {
 var getObject$2 = json.getObject,
     extend = json.extend;
 var rollup = rollup_1.rollup;
+/*
+const RollupFormats = {
+	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+	'system': 'system', // Native format of the SystemJS loader
+};
+
+const TypescriptTarget = ["ES3", "ES5", "ES6", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"];
+const TypescriptModule = ["CommonJS", "AMD", "System", "UMD", "ES6", "ES2015", "ESNext", "None"];
+*/
+// compile('tsconfig.json');
 
 function typescript_(item) {
   var output = typescriptOutput(item)[0];
@@ -787,10 +1061,20 @@ function typescript_(item) {
     default:
       return typescriptLib(item);
   }
+  /*
+  'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+  'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+  	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+  'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+  'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+  'system': 'system', // Native format of the SystemJS loader
+  */
+
 }
 
 function typescriptLib(item, output) {
   return through2.obj(function (file, enc, callback) {
+    // console.log('TfsCheckout', file.path);
     if (file.isNull()) {
       return callback(null, file);
     }
@@ -806,11 +1090,19 @@ function typescriptLib(item, output) {
 }
 
 function typescriptCompile(file, item) {
-  var config = typescriptConfig(item);
+  // Extract configuration from config file
+  var config = typescriptConfig(item); // console.log('fileNames', config.fileNames);
+  // console.log('options', config.options);
+  // return 0;
+
   var program = typescript$1.createProgram(config.fileNames, config.options);
-  var emitResult = program.emit();
-  typescriptDiagnostic(typescript$1.getPreEmitDiagnostics(program).concat(emitResult.diagnostics));
-  var exitCode = emitResult.emitSkipped ? 1 : 0;
+  var emitResult = program.emit(); // console.log('emitResult', emitResult);
+  // Report errors
+
+  typescriptDiagnostic(typescript$1.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)); // Return code
+
+  var exitCode = emitResult.emitSkipped ? 1 : 0; // console.log('exitCode', exitCode);
+
   return exitCode;
 }
 
@@ -822,13 +1114,18 @@ function typescriptConfig(item) {
       strict: false
     }
   };
+  /*
+  "baseUrl": "",
+  "mapRoot": "./",
+  */
+
   var configOverride = {
     files: [item.input],
     compilerOptions: {
       moduleResolution: 'node',
       experimentalDecorators: true,
       emitDecoratorMetadata: true,
-      removeComments: true,
+      // removeComments: true,
       importHelpers: true,
       allowSyntheticDefaultImports: true,
       esModuleInterop: true,
@@ -836,7 +1133,7 @@ function typescriptConfig(item) {
     },
     exclude: ['node_modules', '.npm']
   };
-  var output = typescriptOutput(item)[0];
+  var output = typescriptOutput(item)[0]; // console.log(output);
 
   switch (output.format) {
     case 'amd':
@@ -891,16 +1188,25 @@ function typescriptConfig(item) {
       });
       break;
   }
+  /*
+  'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+  'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+  'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+  'system': 'system', // Native format of the SystemJS loader
+  */
+
 
   var config = getObject$2("./" + configFileName, configDefault, configOverride);
-  var configFileText = JSON.stringify(config);
+  var configFileText = JSON.stringify(config); // Parse JSON, after removing comments. Just fancier JSON.parse
+
   var result = typescript$1.parseConfigFileTextToJson(configFileName, configFileText);
   var configObject = result.config;
 
   if (!configObject) {
     typescriptDiagnostic([result.error]);
     return;
-  }
+  } // Extract config infromation
+
 
   var configParseResult = typescript$1.parseJsonConfigFileContent(configObject, typescript$1.sys, path.dirname(configFileName));
 
@@ -927,13 +1233,43 @@ function typescriptDiagnostic(diagnostics) {
 }
 
 function typescriptInput(item) {
-  var plugins = [rollupPluginSourcemaps(), path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
+  // const watchGlob = path.dirname(item.input) + '/**/*' + path.extname(item.input);
+  // console.log('watchGlob', watchGlob);
+  var plugins = [// Resolve source maps to the original source
+  rollupPluginSourcemaps(), // Compile TypeScript files
+  path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
     rollupCommonJSResolveHack: true,
     clean: true,
     declaration: true
-  }) : null, pluginCommonjs({
+  }) : null,
+  /*
+  rollupPluginTypescript2({
+  	lib: ['es5', 'es6', 'dom'],
+  	target: 'es5',
+  	tsconfig: false,
+  }),
+  */
+  // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
+  pluginCommonjs({
     exclude: ['node_modules/**']
-  }), rollupPluginLicense({
+  }), // Allow node_modules resolution, so you can use 'external' to control
+  // which external modules to include in the bundle
+  // https://github.com/rollup/rollup-plugin-node-resolve#usage
+  // rollupPluginNodeResolve(),
+
+  /*
+  rollupPluginBabel({
+  	presets: [
+  		[babelPresetEnv, {
+  			modules: false,
+  			loose: true
+  		}]
+  	],
+  	exclude: 'node_modules/**' // only transpile our source code
+  	// babelrc: false,
+  }),
+  */
+  rollupPluginLicense({
     banner: "@license <%= pkg.name %> v<%= pkg.version %>\n\t\t\t(c) <%= moment().format('YYYY') %> <%= pkg.author %>\n\t\t\tLicense: <%= pkg.license %>"
   })].filter(function (x) {
     return x;
@@ -942,6 +1278,13 @@ function typescriptInput(item) {
     input: item.input,
     plugins: plugins,
     external: item.external || []
+    /*
+    external: ['tslib'],
+    watch: {
+    	include: watchGlob,
+    },
+    */
+
   };
   return input;
 }
@@ -967,6 +1310,18 @@ function typescriptOutput(item) {
     }
 
     output.name = output.name || path.basename(output.file, '.js');
+    /*
+    const plugins = [
+    	path.extname(input) === '.ts' ? rollupPluginTypescript2({
+    		target: output.format === 'es' ? 'ESNext' : 'ES5',
+    		module: output.format === 'es' ? 'ES6' : 'ES5',
+    		moduleResolution: output.format === 'iife' ? 'classic' : 'node',
+    		declaration: true
+    	}) : null,
+    ].filter(x => x);
+    output.plugins = plugins;
+    */
+
     return output;
   });
 }
@@ -982,15 +1337,17 @@ var dest = gulp.dest,
     series = gulp.series,
     src = gulp.src,
     watch$2 = gulp.watch;
-var setEntry$3 = watch_1.setEntry;
+var setEntry$4 = watch_1.setEntry;
 var service$2 = config.service;
 var sass$1 = sass_1.sass;
+var mjml$1 = mjml_1.mjml;
 var rollup$1 = rollup_1.rollup,
     rollupOutput$1 = rollup_1.rollupOutput;
 var typescript = typescript_1.typescript,
     typescriptOutput$1 = typescript_1.typescriptOutput;
 
 function compile(item, ext, done) {
+  // console.log('compile', ext, item);
   var task;
 
   switch (ext) {
@@ -999,15 +1356,21 @@ function compile(item, ext, done) {
       break;
 
     case '.js':
+    case '.mjs':
       task = compileJsItem(item);
       break;
 
     case '.ts':
+    case '.tsx':
       task = compileTsItem(item);
       break;
 
     case '.html':
       task = compileHtmlItem(item);
+      break;
+
+    case '.mjml':
+      task = compileMjmlItem(item);
       break;
   }
 
@@ -1017,7 +1380,7 @@ function compile(item, ext, done) {
 function compileScss(done) {
   var items = compiles('.scss');
   var tasks = items.map(function (item) {
-    return function itemTask() {
+    return function compileScss() {
       return compileScssItem(item);
     };
   });
@@ -1037,7 +1400,8 @@ function compileScssItem(item) {
     sourcemaps: '.'
   })).pipe(gulpFilter('**/*.css')).on('end', function () {
     return logger('Compile', item.output);
-  }).pipe(gulpIf(item.minify, gulpPostcss([cssnano()]))).pipe(gulpIf(item.minify, gulpRename({
+  }).pipe(gulpIf(item.minify, gulpPostcss([// gulpAutoprefixer({browsers: ['last 1 version']}),
+  cssnano()]))).pipe(gulpIf(item.minify, gulpRename({
     extname: '.min.css'
   }))).pipe(tfs_1(!item.minify)).pipe(gulpIf(item.minify, dest('.', {
     sourcemaps: '.'
@@ -1045,9 +1409,9 @@ function compileScssItem(item) {
 }
 
 function compileJs(done) {
-  var items = compiles('.js');
+  var items = compiles('.js', '.mjs');
   var tasks = items.map(function (item) {
-    return function itemTask(done) {
+    return function compileJs(done) {
       return compileJsItem(item, done);
     };
   });
@@ -1058,7 +1422,7 @@ function compileJsItem(item, done) {
   var tasks = [];
   var outputs = rollupOutput$1(item);
   outputs.forEach(function (output, i) {
-    tasks.push(function itemTask(done) {
+    tasks.push(function compileJsItem(done) {
       var item_ = Object.assign({}, item, {
         output: output
       });
@@ -1069,9 +1433,9 @@ function compileJsItem(item, done) {
 }
 
 function compileTs(done) {
-  var items = compiles('.ts');
+  var items = compiles('.ts', '.tsx');
   var tasks = items.map(function (item) {
-    return function itemTask(done) {
+    return function compileTs(done) {
       return compileTsItem(item, done);
     };
   });
@@ -1082,22 +1446,24 @@ function compileTsItem(item, done) {
   var tasks = [];
   var outputs = typescriptOutput$1(item);
   outputs.forEach(function (output, i) {
-    tasks.push(function itemTask(done) {
+    tasks.push(function compileTsItem(done) {
       var item_ = Object.assign({}, item, {
         output: output
       });
       var output_ = typescriptOutput$1(item_)[0];
+      var task;
 
       switch (output_.format) {
         case 'iife':
         case 'umd':
-          return compileRollup(item_);
+          task = compileRollup(item_);
+          break;
 
         default:
-          return compileTypescript(item_);
+          task = compileTypescript(item_);
       }
 
-      return compileTypescript(item_);
+      return task;
     });
   });
   return tasks.length ? series.apply(void 0, tasks)(done) : done();
@@ -1106,7 +1472,7 @@ function compileTsItem(item, done) {
 function compileHtml(done) {
   var items = compiles('.html');
   var tasks = items.map(function (item) {
-    return function itemTask() {
+    return function compileHtml() {
       return compileHtmlItem(item);
     };
   });
@@ -1114,7 +1480,7 @@ function compileHtml(done) {
 }
 
 function compileHtmlItem(item) {
-  setEntry$3(item.input, path.extname(item.input));
+  setEntry$4(item.input, path.extname(item.input));
   return src(item.input, {
     base: '.',
     allowEmpty: true,
@@ -1135,6 +1501,33 @@ function compileHtmlItem(item) {
   }).pipe(gulpConnect.reload());
 }
 
+function compileMjml(done) {
+  var items = compiles('.mjml');
+  var tasks = items.map(function (item) {
+    return function compileMjml() {
+      return compileMjmlItem(item);
+    };
+  });
+  return tasks.length ? parallel.apply(void 0, tasks)(done) : done();
+}
+
+function compileMjmlItem(item) {
+  setEntry$4(item.input, path.extname(item.input));
+  return src(item.input, {
+    base: '.',
+    allowEmpty: true,
+    sourcemaps: true
+  }).pipe(gulpPlumber()).pipe(mjml$1(item)).pipe(gulpRename(function (path) {
+    return {
+      dirname: item.output,
+      basename: path.basename,
+      extname: path.extname
+    };
+  })).pipe(tfs_1()).pipe(dest('.')).on('end', function () {
+    return logger('Compile', item.output);
+  }).pipe(gulpConnect.reload());
+}
+
 function compileRollup(item) {
   var outputs = rollupOutput$1(item);
   var minify = item.minify;
@@ -1142,7 +1535,17 @@ function compileRollup(item) {
     base: '.',
     allowEmpty: true,
     sourcemaps: true
-  }).pipe(gulpPlumber()).pipe(rollup$1(item)).pipe(tfs_1()).pipe(dest('.', minify ? null : {
+  }).pipe(gulpPlumber()).pipe(rollup$1(item))
+  /*
+  .pipe(gulpRename(function(file) {
+  	const output = outputs.find(x => {
+  		// console.log('file', x.file, file.basename, x.file.indexOf(file.basename));
+  		return x.file.indexOf(file.basename) !== -1;
+  	});
+  	file.dirname = path.dirname(output.file);
+  }))
+  */
+  .pipe(tfs_1()).pipe(dest('.', minify ? null : {
     sourcemaps: '.'
   })).pipe(gulpFilter('**/*.js')).on('end', function () {
     return logger('Compile', outputs.map(function (x) {
@@ -1162,17 +1565,34 @@ function compileTypescript(item) {
     base: '.',
     allowEmpty: true,
     sourcemaps: true
-  }).pipe(gulpPlumber()).pipe(typescript(item)).pipe(gulpFilter('**/*.js')).on('end', function () {
+  }).pipe(gulpPlumber()).pipe(typescript(item))
+  /*
+  // .pipe(gulpRename(item.output))
+  .pipe(tfsCheckout())
+  .pipe(dest('.', minify ? null : { sourcemaps: '.' }))
+  */
+  .pipe(gulpFilter('**/*.js')).on('end', function () {
     return logger('Compile', outputs.map(function (x) {
       return x.file;
     }).join(', '));
-  }).pipe(gulpFilter('**/*.js')).pipe(gulpConnect.reload());
+  })
+  /*
+  .pipe(gulpIf(minify, gulpTerser()))
+  .pipe(gulpIf(minify, gulpRename({ extname: '.min.js' })))
+  .pipe(tfsCheckout(!minify))
+  .pipe(gulpIf(minify, dest('.', { sourcemaps: '.' })))
+  */
+  .pipe(gulpFilter('**/*.js')).pipe(gulpConnect.reload());
 }
 
-function compiles(ext) {
+function compiles() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
   if (service$2.config) {
     return service$2.config.compile.filter(function (item) {
-      return new RegExp(ext + "$").test(item.input);
+      return new RegExp(args.join('|') + "$").test(item.input);
     });
   } else {
     return [];
@@ -1187,7 +1607,9 @@ var compile_1 = {
   compileJsItem: compileJsItem,
   compileTs: compileTs,
   compileTsItem: compileTsItem,
-  compileHtml: compileHtml
+  compileHtml: compileHtml,
+  compileMjml: compileMjml,
+  compileMjmlItem: compileMjmlItem
 };
 
 var dest$1 = gulp.dest,
@@ -1195,7 +1617,7 @@ var dest$1 = gulp.dest,
     src$1 = gulp.src,
     watch$3 = gulp.watch;
 var service$3 = config.service;
-var setEntry$4 = watch_1.setEntry;
+var setEntry$5 = watch_1.setEntry;
 
 function bundle(item, ext, done) {
   var task;
@@ -1216,8 +1638,8 @@ function bundle(item, ext, done) {
 function bundleCss(done) {
   var items = bundles('.css');
   var tasks = items.map(function (item) {
-    return function itemTask(done) {
-      setEntry$4(item.output, Array.isArray(item.input) ? item.input : [item.input]);
+    return function bundleCss(done) {
+      setEntry$5(item.output, Array.isArray(item.input) ? item.input : [item.input]);
       return bundleCssItem(item);
     };
   });
@@ -1226,7 +1648,8 @@ function bundleCss(done) {
 
 function bundleCssItem(item) {
   var skip = item.input.length === 1 && item.input[0] === item.output;
-  var plugins = [cssnano()];
+  var plugins = [// autoprefixer({browsers: ['last 1 version']}),
+  cssnano()];
   return src$1(item.input, {
     base: '.',
     allowEmpty: true,
@@ -1243,8 +1666,8 @@ function bundleCssItem(item) {
 function bundleJs(done) {
   var items = bundles('.js');
   var tasks = items.map(function (item) {
-    return function itemTask(done) {
-      setEntry$4(item.output, Array.isArray(item.input) ? item.input : [item.input]);
+    return function bundleJs(done) {
+      setEntry$5(item.output, Array.isArray(item.input) ? item.input : [item.input]);
       return bundleJsItem(item);
     };
   });
@@ -1266,10 +1689,14 @@ function bundleJsItem(item) {
   }))).pipe(gulpFilter('**/*.js'));
 }
 
-function bundles(ext) {
+function bundles() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
   if (service$3.config) {
     return service$3.config.bundle.filter(function (item) {
-      return new RegExp(ext + "$").test(item.output);
+      return new RegExp(args.join('|') + "$").test(item.output);
     });
   } else {
     return [];
@@ -1292,6 +1719,7 @@ var dest$2 = gulp.dest,
 var service$4 = config.service;
 
 function copy(item, ext, done) {
+  // console.log('copy', ext, item);
   var task;
 
   switch (ext) {
@@ -1305,7 +1733,7 @@ function copy(item, ext, done) {
 function copyTask(done) {
   var items = copies();
   var tasks = items.map(function (item) {
-    return function itemTask(done) {
+    return function copy(done) {
       return copyItemTask(item);
     };
   });
@@ -1340,7 +1768,7 @@ var copy_1 = {
   copies: copies
 };
 
-var service$5 = config.service;
+var service$5 = config.service; // SERVE
 
 function serve(done) {
   if (service$5.config.server) {
@@ -1389,6 +1817,16 @@ function middleware_(options) {
       if (req.url.indexOf('.json') !== -1) {
         req.method = 'GET';
       }
+      /*
+      logger(
+      	'Not rewriting',
+      	req.method,
+      	req.url,
+      	'because the client prefers JSON.'
+      );
+      return next();
+      */
+
     } else if (req.method !== 'GET') {
       logger('Not rewriting', req.method, req.url, 'because the method is not GET.');
       return next();
@@ -1462,6 +1900,7 @@ function getLogger(options) {
   if (options && options.logger) {
     return options.logger;
   } else if (options && options.verbose) {
+    // eslint-disable-next-line no-console
     return console.log.bind(console);
   }
 
@@ -1478,24 +1917,25 @@ var compile$1 = compile_1.compile,
     compileScss$1 = compile_1.compileScss,
     compileJs$1 = compile_1.compileJs,
     compileTs$1 = compile_1.compileTs,
-    compileHtml$1 = compile_1.compileHtml;
+    compileHtml$1 = compile_1.compileHtml,
+    compileMjml$1 = compile_1.compileMjml;
 var bundle$1 = bundle_1.bundle,
     bundleCss$1 = bundle_1.bundleCss,
     bundleJs$1 = bundle_1.bundleJs;
 var copyTask$1 = copy_1.copyTask;
 var serve$1 = serve_1.serve;
 var watchEntries$1 = watch_1.watchEntries,
-    setEntry$5 = watch_1.setEntry;
+    setEntry$6 = watch_1.setEntry;
 var CONFIG_PATH$1 = config.CONFIG_PATH,
     getConfig$1 = config.getConfig;
 var config$1 = getConfig$1();
-var compileTask = parallel$3(compileScss$1, compileJs$1, compileTs$1, compileHtml$1);
+var compileTask = parallel$3(compileScss$1, compileJs$1, compileTs$1, compileHtml$1, compileMjml$1);
 var compileCssTask = parallel$3(compileScss$1);
 var compileJsTask = parallel$3(compileJs$1, compileTs$1);
 var bundleTask = parallel$3(bundleCss$1, bundleJs$1);
 
 function watchTask(done, filters) {
-  setEntry$5(CONFIG_PATH$1, CONFIG_PATH$1);
+  setEntry$6(CONFIG_PATH$1, CONFIG_PATH$1);
   watchEntries$1(function (path_, entry, done) {
     if (entry === CONFIG_PATH$1) {
       config$1 = getConfig$1();
@@ -1503,11 +1943,13 @@ function watchTask(done, filters) {
     }
 
     config$1.target.compile.forEach(function (x) {
+      // console.log(entry, x.input);
       if (entry.indexOf(x.input) !== -1) {
         var ext = path.extname(entry);
 
         if (!filters || filters.indexOf(ext) !== -1) {
-          logger('Watch', path_, '>', entry);
+          logger('Watch', path_, '>', entry); // console.log('compile', ext, x);
+
           compile$1(x, ext, done);
         }
       }
@@ -1522,21 +1964,36 @@ function watchTask(done, filters) {
         var ext = path.extname(entry);
 
         if (!filters || filters.indexOf(ext) !== -1) {
-          logger('Watch', path_, '>', entry);
+          logger('Watch', path_, '>', entry); // console.log('bundle', ext, x);
+
           bundle$1(x, ext, done);
         }
       }
     });
+    /*
+    config.target.copy.forEach(x => {
+    	const inputs = Array.isArray(x.input) ? x.input : [x.input];
+    	const item = inputs.find(x => path_.indexOf(x) !== -1);
+    	if (item) {
+    		const ext = path.extname(entry);
+    		if (!filters || filters.indexOf(ext) !== -1) {
+    			log('Watch', path_, '>', entry);
+    			// console.log('copy', ext, x);
+    			copy(x, ext, done);
+    		}
+    	}
+    });
+    */
   });
   done();
 }
 
 function watchCssTask(done) {
-  return watchTask(node, ['.scss', '.css']);
+  return watchTask(done, ['.scss', '.css']);
 }
 
 function watchJsTask(done) {
-  return watchTask(node, ['.js', '.mjs', '.ts', '.tsx']);
+  return watchTask(done, ['.js', '.mjs', '.ts', '.tsx']);
 }
 
 var compile_1$1 = compileTask;

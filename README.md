@@ -6,84 +6,15 @@ Gulp bundler utility with `gulpfile-config.json`
 
 ## Requirements
 
-### [NodeJs](https://nodejs.org/it/)
-```
-node.js -v
-```
-___
-
-### [Npm](https://www.npmjs.com/)
-```
-npm -v
-```
-___
-### Updating Npm on Mac
-```
-npm install npm@latest -g
-```
-___
-### Updating Npm on Windows
-[npm-windows-upgrade](https://www.npmjs.com/package/npm-windows-upgrade) 
-___
-
 ### [Gulp CLI](https://github.com/angular/angular-cli) version 4.0.0
 ```
 npm install gulp-cli -g
 ```
 ___
 
-### Install packages
+## Installation
 ```
-npm install
-```
-___
-
-### Build, Serve & Watch 
-```
-gulp
-```
-
-___
-
-### Build Only
-```
-gulp build
-```
-___
-
-### Build & Watch 
-```
-gulp start
-```
-___
-
-### Build Js Only
-```
-gulp buildJs
-```
-___
-
-### Build Js & Watch 
-```
-gulp startJs
-```
-___
-
-### Build Css Only
-```
-gulp buildCss
-```
-___
-
-### Build Css & Watch 
-```
-gulp startCss
-```
-___
-
-### Build Specific Target
-```
-gulp build --target dist
+npm install gulpfile-config --save
 ```
 ___
 
@@ -93,61 +24,90 @@ You can configure building targets, compilers and bundlers with an easy json con
 
 As in the example [gulpfile-config.json](https://github.com/actarian/gulp-4-bundler/blob/master/gulpfile-config.json)
 
-___
-
-## gulpfile-config.json
-
-> gulpfile-config.json
-
 ```json
 {
-	"targets": {
-		"browser": {
-			"compile": [
-				{
-					"input": "test/*.html",
-					"output": "docs/",
-					"minify": true
+  "targets": {
+    "browser": {
+      "compile": [
+        {
+          "input": "test/*.html",
+          "output": "docs/",
+          "minify": true
         },
-				{
-					"input": "test/templates/emails/*.mjml",
-					"output": "docs/templates/emails/",
-					"minify": false
+        {
+          "input": "test/templates/emails/*.mjml",
+          "output": "docs/templates/emails/",
+          "minify": false
         },
-				{
-					"input": "test/css/main.scss",
-					"output": "docs/css/main.css",
-					"minify": true
+        {
+          "input": "test/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
         },
-				{
-					"input": "test/js/main.js",
-					"output": "docs/js/main.js",
-					"minify": true
+        {
+          "input": "test/js/main.js",
+          "output": "docs/js/main.js",
+          "minify": true
         }
       ],
-			"bundle": []
-		},
-		"dist": {
-			"compile": [
-				{
-					"input": "src/gulpfile-config.js",
-					"output": {
-						"file": "dist/gulpfile-config.js",
-						"format": "cjs"
-					}
+      "bundle": []
+    },
+    "dist": {
+      "compile": [
+        {
+          "input": "src/gulpfile-config.js",
+          "output": {
+            "file": "dist/gulpfile-config.js",
+            "format": "cjs"
+          }
         }
       ],
-			"bundle": []
-		}
-	},
-	"server": {
-		"root": "./docs",
-		"path": "/gulpfile-config/",
-		"host": "localhost",
-		"port": 34999
-	},
-	"tfs": false
+      "bundle": []
+    }
+  },
+  "server": {
+    "root": "./docs",
+    "path": "/gulpfile-config/",
+    "host": "localhost",
+    "port": 34999
+  },
+  "tfs": false
 }
+```
+
+## Commands
+
+### Build, Serve & Watch 
+```
+gulp
+```
+### Build Only
+```
+gulp build
+```
+### Build & Watch 
+```
+gulp start
+```
+### Build Js Only
+```
+gulp buildJs
+```
+### Build Js & Watch 
+```
+gulp startJs
+```
+### Build Css Only
+```
+gulp buildCss
+```
+### Build Css & Watch 
+```
+gulp startCss
+```
+### Build Specific Target
+```
+gulp build --target dist
 ```
 ___
 ## Contributing
