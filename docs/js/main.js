@@ -7,6 +7,6 @@
 (function () {
 	'use strict';
 
-	document.querySelector('.content').innerHTML = 'Hello World.';
+	document.querySelector('.output').innerHTML = "I'm an es6 module!";
 
 }());

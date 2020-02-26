@@ -1,4 +1,4 @@
 /**
  * main es6 module example
  */
-document.querySelector('.content').innerHTML = 'Hello World.';
+document.querySelector('.output').innerHTML = `I'm an es6 module!`;

@@ -103,23 +103,40 @@ ___
 {
 	"targets": {
 		"browser": {
-			"compile": [{
-				"input": "test/css/main.scss",
-				"output": "docs/css/main.css",
-				"minify": true
-			}, {
-				"input": "test/js/main.js",
-				"output": "docs/js/main.js",
-				"minify": true
-			}],
+			"compile": [
+				{
+					"input": "test/*.html",
+					"output": "docs/",
+					"minify": true
+        },
+				{
+					"input": "test/templates/emails/*.mjml",
+					"output": "docs/templates/emails/",
+					"minify": false
+        },
+				{
+					"input": "test/css/main.scss",
+					"output": "docs/css/main.css",
+					"minify": true
+        },
+				{
+					"input": "test/js/main.js",
+					"output": "docs/js/main.js",
+					"minify": true
+        }
+      ],
 			"bundle": []
 		},
 		"dist": {
-			"compile": [{
-				"input": "src/gulpfile-config.js",
-				"output": "dist/gulpfile-config.js",
-				"minify": false
-			}],
+			"compile": [
+				{
+					"input": "src/gulpfile-config.js",
+					"output": {
+						"file": "dist/gulpfile-config.js",
+						"format": "cjs"
+					}
+        }
+      ],
 			"bundle": []
 		}
 	},
