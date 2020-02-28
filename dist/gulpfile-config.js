@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.4
+ * @license gulpfile-config v1.0.0-alpha.5
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -35,7 +35,7 @@ var through2 = _interopDefault(require('through2'));
 var nodeSass = _interopDefault(require('node-sass'));
 var vinyl = _interopDefault(require('vinyl'));
 var vinylSourcemapsApply = _interopDefault(require('vinyl-sourcemaps-apply'));
-var rollup$2 = _interopDefault(require('rollup'));
+var rollup$1 = _interopDefault(require('rollup'));
 var rollupPluginMjml = _interopDefault(require('rollup-plugin-mjml'));
 var core = _interopDefault(require('@babel/core'));
 var rollupPluginBabel = _interopDefault(require('rollup-plugin-babel'));
@@ -699,7 +699,7 @@ function mjml(item) {
       });
     };
 
-    rollup$2.rollup(inputOptions).then(function (bundle) {
+    rollup$1.rollup(inputOptions).then(function (bundle) {
       var outputs = mjmlOutput(item);
 
       if (inputOptions.cache !== false) {
@@ -874,7 +874,7 @@ function rollup_(item) {
       });
     };
 
-    rollup$2.rollup(inputOptions).then(function (bundle) {
+    rollup$1.rollup(inputOptions).then(function (bundle) {
       // console.log(bundle);
       var outputs = rollupOutput(item); // console.log(outputs);
 
@@ -1034,21 +1034,6 @@ var rollup_1 = {
 
 var getObject$2 = json.getObject,
     extend = json.extend;
-var rollup = rollup_1.rollup;
-/*
-const RollupFormats = {
-	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
-	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
-	'system': 'system', // Native format of the SystemJS loader
-};
-
-const TypescriptTarget = ["ES3", "ES5", "ES6", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"];
-const TypescriptModule = ["CommonJS", "AMD", "System", "UMD", "ES6", "ES2015", "ESNext", "None"];
-*/
-// compile('tsconfig.json');
 
 function typescript_(item) {
   var output = typescriptOutput(item)[0];
@@ -1056,20 +1041,11 @@ function typescript_(item) {
   switch (output.format) {
     case 'iife':
     case 'umd':
-      return rollup(item);
+      return;
 
     default:
       return typescriptLib(item);
   }
-  /*
-  'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
-  'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
-  	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-  'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-  'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-  'system': 'system', // Native format of the SystemJS loader
-  */
-
 }
 
 function typescriptLib(item, output) {
@@ -1188,13 +1164,6 @@ function typescriptConfig(item) {
       });
       break;
   }
-  /*
-  'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-  'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-  'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-  'system': 'system', // Native format of the SystemJS loader
-  */
-
 
   var config = getObject$2("./" + configFileName, configDefault, configOverride);
   var configFileText = JSON.stringify(config); // Parse JSON, after removing comments. Just fancier JSON.parse
@@ -1230,63 +1199,6 @@ function typescriptDiagnostic(diagnostics) {
     message += ': ' + typescript$1.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
     console.log(message);
   });
-}
-
-function typescriptInput(item) {
-  // const watchGlob = path.dirname(item.input) + '/**/*' + path.extname(item.input);
-  // console.log('watchGlob', watchGlob);
-  var plugins = [// Resolve source maps to the original source
-  rollupPluginSourcemaps(), // Compile TypeScript files
-  path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
-    rollupCommonJSResolveHack: true,
-    clean: true,
-    declaration: true
-  }) : null,
-  /*
-  rollupPluginTypescript2({
-  	lib: ['es5', 'es6', 'dom'],
-  	target: 'es5',
-  	tsconfig: false,
-  }),
-  */
-  // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-  pluginCommonjs({
-    exclude: ['node_modules/**']
-  }), // Allow node_modules resolution, so you can use 'external' to control
-  // which external modules to include in the bundle
-  // https://github.com/rollup/rollup-plugin-node-resolve#usage
-  // rollupPluginNodeResolve(),
-
-  /*
-  rollupPluginBabel({
-  	presets: [
-  		[babelPresetEnv, {
-  			modules: false,
-  			loose: true
-  		}]
-  	],
-  	exclude: 'node_modules/**' // only transpile our source code
-  	// babelrc: false,
-  }),
-  */
-  rollupPluginLicense({
-    banner: "@license <%= pkg.name %> v<%= pkg.version %>\n\t\t\t(c) <%= moment().format('YYYY') %> <%= pkg.author %>\n\t\t\tLicense: <%= pkg.license %>"
-  })].filter(function (x) {
-    return x;
-  });
-  var input = {
-    input: item.input,
-    plugins: plugins,
-    external: item.external || []
-    /*
-    external: ['tslib'],
-    watch: {
-    	include: watchGlob,
-    },
-    */
-
-  };
-  return input;
 }
 
 function typescriptOutput(item) {
@@ -1328,20 +1240,18 @@ function typescriptOutput(item) {
 
 var typescript_1 = {
   typescript: typescript_,
-  typescriptInput: typescriptInput,
   typescriptOutput: typescriptOutput
 };
 
 var dest = gulp.dest,
     parallel = gulp.parallel,
     series = gulp.series,
-    src = gulp.src,
-    watch$2 = gulp.watch;
+    src = gulp.src;
 var setEntry$4 = watch_1.setEntry;
 var service$2 = config.service;
 var sass$1 = sass_1.sass;
 var mjml$1 = mjml_1.mjml;
-var rollup$1 = rollup_1.rollup,
+var rollup = rollup_1.rollup,
     rollupOutput$1 = rollup_1.rollupOutput;
 var typescript = typescript_1.typescript,
     typescriptOutput$1 = typescript_1.typescriptOutput;
@@ -1530,12 +1440,12 @@ function compileMjmlItem(item) {
 
 function compileRollup(item) {
   var outputs = rollupOutput$1(item);
-  var minify = item.minify;
+  var minify = item.minify || outputs[0].minify;
   return src(item.input, {
     base: '.',
     allowEmpty: true,
     sourcemaps: true
-  }).pipe(gulpPlumber()).pipe(rollup$1(item))
+  }).pipe(gulpPlumber()).pipe(rollup(item))
   /*
   .pipe(gulpRename(function(file) {
   	const output = outputs.find(x => {
@@ -1560,7 +1470,7 @@ function compileRollup(item) {
 
 function compileTypescript(item) {
   var outputs = typescriptOutput$1(item);
-  var minify = outputs[0].minify;
+  var minify = item.minify || outputs[0].minify;
   return src(item.input, {
     base: '.',
     allowEmpty: true,
@@ -1615,7 +1525,7 @@ var compile_1 = {
 var dest$1 = gulp.dest,
     parallel$1 = gulp.parallel,
     src$1 = gulp.src,
-    watch$3 = gulp.watch;
+    watch$2 = gulp.watch;
 var service$3 = config.service;
 var setEntry$5 = watch_1.setEntry;
 
@@ -1715,7 +1625,7 @@ var bundle_1 = {
 var dest$2 = gulp.dest,
     parallel$2 = gulp.parallel,
     src$2 = gulp.src,
-    watch$4 = gulp.watch;
+    watch$3 = gulp.watch;
 var service$4 = config.service;
 
 function copy(item, ext, done) {
@@ -1998,7 +1908,7 @@ function watchJsTask(done) {
 
 var compile_1$1 = compileTask;
 var bundle_1$1 = series$1(bundleTask, copyTask$1);
-var watch$5 = watchTask;
+var watch$4 = watchTask;
 var serve_1$1 = serve$1;
 var build = series$1(compileTask, bundleTask, copyTask$1);
 var buildCss = series$1(compileCssTask, bundleCss$1);
@@ -2010,7 +1920,7 @@ var buildWatchAndServe = series$1(compileTask, bundleTask, copyTask$1, watchTask
 var gulpfileConfig = {
   compile: compile_1$1,
   bundle: bundle_1$1,
-  watch: watch$5,
+  watch: watch$4,
   serve: serve_1$1,
   build: build,
   buildCss: buildCss,
@@ -2032,5 +1942,5 @@ exports.bundle = bundle_1$1;
 exports.compile = compile_1$1;
 exports.default = gulpfileConfig;
 exports.serve = serve_1$1;
-exports.watch = watch$5;
+exports.watch = watch$4;
 //# sourceMappingURL=gulpfile-config.js.map
