@@ -3,6 +3,12 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-alpha.6] - 2020-03-03
+### Fixing
+- Fixing watcher
+
+---
+
 ## [1.0.0-alpha.5] - 2020-02-28
 ### Fixing
 - Fixing rollup minification

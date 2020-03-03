@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.5
+ * @license gulpfile-config v1.0.0-alpha.6
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -42,7 +42,7 @@ var rollupPluginBabel = _interopDefault(require('rollup-plugin-babel'));
 var pluginCommonjs = _interopDefault(require('@rollup/plugin-commonjs'));
 var rollupPluginSourcemaps = _interopDefault(require('rollup-plugin-sourcemaps'));
 var rollupPluginLicense = _interopDefault(require('rollup-plugin-license'));
-require('@rollup/plugin-node-resolve');
+var pluginNodeResolve = _interopDefault(require('@rollup/plugin-node-resolve'));
 var rollupPluginTypescript2 = _interopDefault(require('rollup-plugin-typescript2'));
 var typescript$1 = _interopDefault(require('typescript'));
 var gulpConcat = _interopDefault(require('gulp-concat'));
@@ -214,10 +214,7 @@ function watchEntries(callback) {
     watcher.close();
   }
 
-  var complete;
-  watcher = watch(['**/*.*', '!node_modules/**/*.*'], function watch(done) {
-    complete = done; // console.log('done');
-  }).on('change', function (path_) {
+  watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', function (path_) {
     var entry = Object.keys(entries).reduce(function (p, key) {
       var imports = entries[key];
 
@@ -251,13 +248,8 @@ function watchEntries(callback) {
       // console.log('entry', entry);
       // log('watch.changed', path_, '>', entry);
       if (typeof callback === 'function') {
-        callback(path_, entry, complete);
+        callback(path_, entry);
       }
-    } else {
-      if (typeof complete === 'function') {
-        return complete();
-      } // console.log('change');
-
     }
   });
 }
@@ -906,12 +898,13 @@ function rollup_(item) {
 }
 
 function rollupInput(item) {
+  var output = rollupOutput(item)[0];
   var presetEnvOptions = {
     modules: false,
     loose: true
   };
 
-  if (typeof item.output === 'object' && item.output.format === 'esm' || item.target === 'esm') {
+  if (output.format === 'esm') {
     presetEnvOptions.targets = {
       esmodules: true
     };
@@ -930,7 +923,7 @@ function rollupInput(item) {
       allowJs: true,
       declaration: false,
       sourceMap: true,
-      removeComments: item.output.format === 'iife'
+      removeComments: output.format === 'iife'
     },
     exclude: ['./node_modules/*', '.npm']
   };
@@ -942,24 +935,21 @@ function rollupInput(item) {
       allowJs: true,
       declaration: false,
       sourceMap: true,
-      removeComments: item.output.format === 'iife'
+      removeComments: output.format === 'iife'
     },
     exclude: ['./node_modules/*', '.npm']
   }; // const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
   // console.log('watchGlob', watchGlob);
 
   var plugins = [// Resolve source maps to the original source
-  rollupPluginSourcemaps(),
-  /*
-  // Allow node_modules resolution, so you can use 'external' to control
+  rollupPluginSourcemaps(), // Allow node_modules resolution, so you can use 'external' to control
   // which external modules to include in the bundle
   // https://github.com/rollup/rollup-plugin-node-resolve#usage
   // import node modules
-  rollupPluginNodeResolve(),
-  */
+  output.format === 'cjs' ? null : pluginNodeResolve(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
   // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
   pluginCommonjs({
-    exclude: ['node_modules/**']
+    exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined
   }), // Compile TypeScript files
   path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
     typescript: typescript$1,
@@ -976,7 +966,7 @@ function rollupInput(item) {
     plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
     exclude: 'node_modules/**',
     // only transpile our source code
-    comments: item.output.format !== 'iife' // babelHelpers: 'bundled', // only for version 5
+    comments: output.format !== 'iife' // babelHelpers: 'bundled', // only for version 5
     // babelrc: false,
 
   }), rollupPluginLicense({
@@ -984,10 +974,11 @@ function rollupInput(item) {
   })].filter(function (x) {
     return x;
   });
+  var globals = Object.keys(output.globals);
   var input = {
     input: item.input,
     plugins: plugins,
-    external: item.external || [],
+    external: globals.length ? globals : item.external || [],
     cache: false,
     // !! break babel if true
     treeshake: true
@@ -1002,9 +993,8 @@ function rollupInput(item) {
 }
 
 function rollupOutput(item) {
-  var input = item.input;
-  var output = item.output;
-  var outputs = Array.isArray(output) ? output : [output];
+  var outputs = Array.isArray(item.output) ? item.output : [item.output];
+  var output = outputs[0];
   var default_ = {
     format: 'iife',
     name: item.name || null,
@@ -1034,9 +1024,10 @@ var rollup_1 = {
 
 var getObject$2 = json.getObject,
     extend = json.extend;
+var rollupOutput$1 = rollup_1.rollupOutput;
 
 function typescript_(item) {
-  var output = typescriptOutput(item)[0];
+  var output = rollupOutput$1(item)[0];
 
   switch (output.format) {
     case 'iife':
@@ -1109,7 +1100,7 @@ function typescriptConfig(item) {
     },
     exclude: ['node_modules', '.npm']
   };
-  var output = typescriptOutput(item)[0]; // console.log(output);
+  var output = rollupOutput$1(item)[0]; // console.log(output);
 
   switch (output.format) {
     case 'amd':
@@ -1201,46 +1192,8 @@ function typescriptDiagnostic(diagnostics) {
   });
 }
 
-function typescriptOutput(item) {
-  var input = item.input;
-  var output = item.output;
-  var outputs = Array.isArray(output) ? output : [output];
-  var default_ = {
-    format: 'iife',
-    name: item.name || null,
-    globals: item.globals || {},
-    sourcemap: true,
-    minify: item.minify || false
-  };
-  return outputs.map(function (x) {
-    var output = Object.assign({}, default_);
-
-    if (typeof x === 'string') {
-      output.file = x;
-    } else if (typeof x === 'object') {
-      output = Object.assign(output, x);
-    }
-
-    output.name = output.name || path.basename(output.file, '.js');
-    /*
-    const plugins = [
-    	path.extname(input) === '.ts' ? rollupPluginTypescript2({
-    		target: output.format === 'es' ? 'ESNext' : 'ES5',
-    		module: output.format === 'es' ? 'ES6' : 'ES5',
-    		moduleResolution: output.format === 'iife' ? 'classic' : 'node',
-    		declaration: true
-    	}) : null,
-    ].filter(x => x);
-    output.plugins = plugins;
-    */
-
-    return output;
-  });
-}
-
 var typescript_1 = {
-  typescript: typescript_,
-  typescriptOutput: typescriptOutput
+  typescript: typescript_
 };
 
 var dest = gulp.dest,
@@ -1252,9 +1205,8 @@ var service$2 = config.service;
 var sass$1 = sass_1.sass;
 var mjml$1 = mjml_1.mjml;
 var rollup = rollup_1.rollup,
-    rollupOutput$1 = rollup_1.rollupOutput;
-var typescript = typescript_1.typescript,
-    typescriptOutput$1 = typescript_1.typescriptOutput;
+    rollupOutput$2 = rollup_1.rollupOutput;
+var typescript = typescript_1.typescript;
 
 function compile(item, ext, done) {
   // console.log('compile', ext, item);
@@ -1330,7 +1282,7 @@ function compileJs(done) {
 
 function compileJsItem(item, done) {
   var tasks = [];
-  var outputs = rollupOutput$1(item);
+  var outputs = rollupOutput$2(item);
   outputs.forEach(function (output, i) {
     tasks.push(function compileJsItem(done) {
       var item_ = Object.assign({}, item, {
@@ -1354,13 +1306,13 @@ function compileTs(done) {
 
 function compileTsItem(item, done) {
   var tasks = [];
-  var outputs = typescriptOutput$1(item);
+  var outputs = rollupOutput$2(item);
   outputs.forEach(function (output, i) {
     tasks.push(function compileTsItem(done) {
       var item_ = Object.assign({}, item, {
         output: output
       });
-      var output_ = typescriptOutput$1(item_)[0];
+      var output_ = rollupOutput$2(item_)[0];
       var task;
 
       switch (output_.format) {
@@ -1439,7 +1391,7 @@ function compileMjmlItem(item) {
 }
 
 function compileRollup(item) {
-  var outputs = rollupOutput$1(item);
+  var outputs = rollupOutput$2(item);
   var minify = item.minify || outputs[0].minify;
   return src(item.input, {
     base: '.',
@@ -1469,7 +1421,7 @@ function compileRollup(item) {
 }
 
 function compileTypescript(item) {
-  var outputs = typescriptOutput$1(item);
+  var outputs = rollupOutput$2(item);
   var minify = item.minify || outputs[0].minify;
   return src(item.input, {
     base: '.',
@@ -1846,10 +1798,10 @@ var bundleTask = parallel$3(bundleCss$1, bundleJs$1);
 
 function watchTask(done, filters) {
   setEntry$6(CONFIG_PATH$1, CONFIG_PATH$1);
-  watchEntries$1(function (path_, entry, done) {
+  watchEntries$1(function (path_, entry) {
     if (entry === CONFIG_PATH$1) {
       config$1 = getConfig$1();
-      return series$1(compileTask, bundleTask, copyTask$1)(done);
+      return series$1(compileTask, bundleTask, copyTask$1);
     }
 
     config$1.target.compile.forEach(function (x) {
@@ -1860,7 +1812,7 @@ function watchTask(done, filters) {
         if (!filters || filters.indexOf(ext) !== -1) {
           logger('Watch', path_, '>', entry); // console.log('compile', ext, x);
 
-          compile$1(x, ext, done);
+          compile$1(x, ext);
         }
       }
     });
@@ -1876,7 +1828,7 @@ function watchTask(done, filters) {
         if (!filters || filters.indexOf(ext) !== -1) {
           logger('Watch', path_, '>', entry); // console.log('bundle', ext, x);
 
-          bundle$1(x, ext, done);
+          bundle$1(x, ext);
         }
       }
     });
