@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.6
+ * @license gulpfile-config v1.0.0-alpha.7
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -215,40 +215,27 @@ function watchEntries(callback) {
   }
 
   watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', function (path_) {
-    var entry = Object.keys(entries).reduce(function (p, key) {
+    var matchedEntries = Object.keys(entries).filter(function (key) {
       var imports = entries[key];
 
       if (isGlob(key)) {
-        if (isExt(path_, imports) && sameRoot(path_, key)) {
-          return key;
-        } else {
-          return p;
-        }
+        return isExt(path_, imports) && sameRoot(path_, key);
       } else if (isPath(imports)) {
-        if (key.indexOf(path_) !== -1) {
-          return key;
-        } else {
-          return p;
-        }
+        return key.indexOf(path_) !== -1;
       } else {
         var found = imports.find(function (i) {
           // console.log(i, path_);
           return i.indexOf(path_) !== -1;
         }) || key.indexOf(path_) !== -1;
-
-        if (found) {
-          return key;
-        } else {
-          return p;
-        }
+        return found;
       }
-    }, null);
+    });
 
-    if (entry) {
-      // console.log('entry', entry);
-      // log('watch.changed', path_, '>', entry);
+    if (matchedEntries.length) {
       if (typeof callback === 'function') {
-        callback(path_, entry);
+        matchedEntries.forEach(function (entry) {
+          return callback(path_, entry);
+        });
       }
     }
   });
