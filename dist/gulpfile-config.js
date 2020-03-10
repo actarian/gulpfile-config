@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.7
+ * @license gulpfile-config v1.0.0-alpha.8
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -189,6 +189,39 @@ logger.error = error_1;
 var watch = gulp.watch;
 var entries = {};
 var cwd = process.cwd();
+var watcher;
+
+function watchEntries(callback) {
+  if (watcher && typeof watcher.close === 'function') {
+    watcher.close();
+  }
+
+  watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', function (path_) {
+    var matchedEntries = Object.keys(entries).filter(function (key) {
+      var imports = entries[key];
+
+      if (isGlob(key)) {
+        return isExt(path_, imports) && sameRoot(path_, key);
+      } else if (isPath(imports)) {
+        return matchPaths(key, path_);
+      } else {
+        var found = imports.find(function (i) {
+          // console.log(i, path_);
+          return matchPaths(i, path_);
+        }) || matchPaths(key, path_);
+        return found;
+      }
+    });
+
+    if (matchedEntries.length) {
+      if (typeof callback === 'function') {
+        matchedEntries.forEach(function (entry) {
+          return callback(path_, entry);
+        });
+      }
+    }
+  });
+}
 
 function setEntry(entry, imports) {
   // console.log(entry, imports);
@@ -207,40 +240,6 @@ function setEntry(entry, imports) {
 
 }
 
-var watcher;
-
-function watchEntries(callback) {
-  if (watcher && typeof watcher.close === 'function') {
-    watcher.close();
-  }
-
-  watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', function (path_) {
-    var matchedEntries = Object.keys(entries).filter(function (key) {
-      var imports = entries[key];
-
-      if (isGlob(key)) {
-        return isExt(path_, imports) && sameRoot(path_, key);
-      } else if (isPath(imports)) {
-        return key.indexOf(path_) !== -1;
-      } else {
-        var found = imports.find(function (i) {
-          // console.log(i, path_);
-          return i.indexOf(path_) !== -1;
-        }) || key.indexOf(path_) !== -1;
-        return found;
-      }
-    });
-
-    if (matchedEntries.length) {
-      if (typeof callback === 'function') {
-        matchedEntries.forEach(function (entry) {
-          return callback(path_, entry);
-        });
-      }
-    }
-  });
-}
-
 function isGlob(path) {
   return typeof path === 'string' && path.indexOf('*') !== -1;
 }
@@ -257,9 +256,18 @@ function sameRoot(p1, p2) {
   return path.dirname(p1).indexOf(path.dirname(p2)) === 0;
 }
 
+function matchPaths(p1, p2) {
+  return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
+}
+
 var watch_1 = {
+  watchEntries: watchEntries,
   setEntry: setEntry,
-  watchEntries: watchEntries
+  isGlob: isGlob,
+  isPath: isPath,
+  isExt: isExt,
+  sameRoot: sameRoot,
+  matchPaths: matchPaths
 };
 
 function getObject(file, objectDefault, objectOverride) {
@@ -1774,7 +1782,8 @@ var bundle$1 = bundle_1.bundle,
 var copyTask$1 = copy_1.copyTask;
 var serve$1 = serve_1.serve;
 var watchEntries$1 = watch_1.watchEntries,
-    setEntry$6 = watch_1.setEntry;
+    setEntry$6 = watch_1.setEntry,
+    matchPaths$1 = watch_1.matchPaths;
 var CONFIG_PATH$1 = config.CONFIG_PATH,
     getConfig$1 = config.getConfig;
 var config$1 = getConfig$1();
@@ -1793,7 +1802,7 @@ function watchTask(done, filters) {
 
     config$1.target.compile.forEach(function (x) {
       // console.log(entry, x.input);
-      if (entry.indexOf(x.input) !== -1) {
+      if (matchPaths$1(entry, x.input)) {
         var ext = path.extname(entry);
 
         if (!filters || filters.indexOf(ext) !== -1) {
@@ -1806,7 +1815,7 @@ function watchTask(done, filters) {
     config$1.target.bundle.forEach(function (x) {
       var inputs = Array.isArray(x.input) ? x.input : [x.input];
       var item = inputs.find(function (x) {
-        return path_.indexOf(x) !== -1;
+        return matchPaths$1(path_, x);
       });
 
       if (item) {
@@ -1822,7 +1831,7 @@ function watchTask(done, filters) {
     /*
     config.target.copy.forEach(x => {
     	const inputs = Array.isArray(x.input) ? x.input : [x.input];
-    	const item = inputs.find(x => path_.indexOf(x) !== -1);
+    	const item = inputs.find(x => matchPaths(path_, x));
     	if (item) {
     		const ext = path.extname(entry);
     		if (!filters || filters.indexOf(ext) !== -1) {

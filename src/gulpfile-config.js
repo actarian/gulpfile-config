@@ -4,7 +4,7 @@ const { compile, compileScss, compileJs, compileTs, compileHtml, compileMjml } =
 const { bundle, bundleCss, bundleJs } = require('./bundle/bundle');
 const { copy, copyTask } = require('./copy/copy');
 const { serve } = require('./serve/serve');
-const { watchEntries, setEntry } = require('./watch/watch');
+const { watchEntries, setEntry, matchPaths } = require('./watch/watch');
 
 const log = require('./logger/logger');
 const { CONFIG_PATH, getConfig } = require('./config/config');
@@ -27,7 +27,7 @@ function watchTask(done, filters) {
 		}
 		config.target.compile.forEach(x => {
 			// console.log(entry, x.input);
-			if (entry.indexOf(x.input) !== -1) {
+			if (matchPaths(entry, x.input)) {
 				const ext = path.extname(entry);
 				if (!filters || filters.indexOf(ext) !== -1) {
 					log('Watch', path_, '>', entry);
@@ -38,7 +38,7 @@ function watchTask(done, filters) {
 		});
 		config.target.bundle.forEach(x => {
 			const inputs = Array.isArray(x.input) ? x.input : [x.input];
-			const item = inputs.find(x => path_.indexOf(x) !== -1);
+			const item = inputs.find(x => matchPaths(path_, x));
 			if (item) {
 				const ext = path.extname(entry);
 				if (!filters || filters.indexOf(ext) !== -1) {
@@ -51,7 +51,7 @@ function watchTask(done, filters) {
 		/*
 		config.target.copy.forEach(x => {
 			const inputs = Array.isArray(x.input) ? x.input : [x.input];
-			const item = inputs.find(x => path_.indexOf(x) !== -1);
+			const item = inputs.find(x => matchPaths(path_, x));
 			if (item) {
 				const ext = path.extname(entry);
 				if (!filters || filters.indexOf(ext) !== -1) {
