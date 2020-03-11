@@ -3,6 +3,12 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-alpha.9] - 2020-03-11
+### Fixing
+- Fixing regexp
+
+---
+
 ## [1.0.0-alpha.8] - 2020-03-10
 ### Fixing
 - Fixing windows watcher

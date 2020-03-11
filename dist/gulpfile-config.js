@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.8
+ * @license gulpfile-config v1.0.0-alpha.9
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1449,7 +1449,9 @@ function compiles() {
 
   if (service$2.config) {
     return service$2.config.compile.filter(function (item) {
-      return new RegExp(args.join('|') + "$").test(item.input);
+      return args.find(function (ext) {
+        return item.input.lastIndexOf(ext) === item.input.length - ext.length;
+      }) !== undefined;
     });
   } else {
     return [];
@@ -1553,7 +1555,9 @@ function bundles() {
 
   if (service$3.config) {
     return service$3.config.bundle.filter(function (item) {
-      return new RegExp(args.join('|') + "$").test(item.output);
+      return args.find(function (ext) {
+        return item.output.lastIndexOf(ext) === item.output.length - ext.length;
+      }) !== undefined;
     });
   } else {
     return [];
