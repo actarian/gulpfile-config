@@ -5,7 +5,7 @@ const { DEFAULT_EXTENSIONS } = require('@babel/core'),
 	rollupPluginCommonJs = require('@rollup/plugin-commonjs'),
 	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
 	rollupPluginLicense = require('rollup-plugin-license'),
-	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').nodeResolve,
+	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve'),
 	rollupPluginTypescript2 = require('rollup-plugin-typescript2'),
 	// rollupPluginTypescript = require('@rollup/plugin-typescript'),
 	through2 = require('through2'),
@@ -175,7 +175,7 @@ function rollupInput(item) {
 		// which external modules to include in the bundle
 		// https://github.com/rollup/rollup-plugin-node-resolve#usage
 		// import node modules
-		output.format === 'cjs' ? null : rollupPluginNodeResolve(),
+		output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)(),
 		// exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
 		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
 		rollupPluginCommonJs({

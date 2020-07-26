@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.10
+ * @license gulpfile-config v1.0.0-alpha.11
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -765,8 +765,7 @@ var mjml_1 = {
   mjmlOutput: mjmlOutput
 };
 
-var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS,
-    rollupPluginNodeResolve = pluginNodeResolve.nodeResolve;
+var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS;
 var setEntry$3 = watch_1.setEntry; // map object storing rollup cache objects for each input file
 
 var rollupCache$1 = new Map();
@@ -948,7 +947,7 @@ function rollupInput(item) {
   // which external modules to include in the bundle
   // https://github.com/rollup/rollup-plugin-node-resolve#usage
   // import node modules
-  output.format === 'cjs' ? null : rollupPluginNodeResolve(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
+  output.format === 'cjs' ? null : (typeof pluginNodeResolve === 'function' ? pluginNodeResolve : pluginNodeResolve.nodeResolve)(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
   // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
   pluginCommonjs({
     exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined
