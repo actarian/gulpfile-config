@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.11
+ * @license gulpfile-config v1.0.0-alpha.12
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -745,7 +745,9 @@ function mjmlOutput(item) {
   var input = item.input;
   var output = item.output;
   var outputs = Array.isArray(output) ? output : [output];
-  var default_ = {};
+  var default_ = {
+    compact: item.minify || false
+  };
   return outputs.map(function (x) {
     var output = Object.assign({}, default_);
 
@@ -1000,8 +1002,8 @@ function rollupOutput(item) {
     format: 'iife',
     name: item.name || null,
     globals: typeof output === 'object' && output.globals || item.globals || {},
-    sourcemap: true // minify: item.minify || false,
-
+    sourcemap: true,
+    compact: item.minify || false
   };
   return outputs.map(function (x) {
     var output = Object.assign({}, default_);
@@ -1394,6 +1396,12 @@ function compileMjmlItem(item) {
 function compileRollup(item) {
   var outputs = rollupOutput$2(item);
   var minify = item.minify || outputs[0].minify;
+
+  if (item.output.minify !== undefined) {
+    delete item.output.minify;
+    item.output.compact = minify;
+  }
+
   return src(item.input, {
     base: '.',
     allowEmpty: true,

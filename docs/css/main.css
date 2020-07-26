@@ -220,10 +220,6 @@ button,
   border: none;
   outline: none;
   color: #212121; }
-  .control--text::-webkit-input-placeholder {
-    font-size: 28px;
-    font-weight: 800;
-    color: rgba(33, 33, 33, 0.2); }
   .control--text::-moz-placeholder {
     font-size: 28px;
     font-weight: 800;
@@ -240,9 +236,6 @@ button,
     font-size: 28px;
     font-weight: 800;
     color: rgba(33, 33, 33, 0.2); }
-
-::-webkit-input-placeholder {
-  font-family: "Open Sans", sans-serif; }
 
 ::-moz-placeholder {
   font-family: "Open Sans", sans-serif; }

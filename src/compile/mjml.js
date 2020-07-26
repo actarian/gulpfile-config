@@ -117,7 +117,9 @@ function mjmlOutput(item) {
 	const input = item.input;
 	const output = item.output;
 	const outputs = Array.isArray(output) ? output : [output];
-	const default_ = {};
+	const default_ = {
+		compact: item.minify || false,
+	};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);
 		if (typeof x === 'string') {

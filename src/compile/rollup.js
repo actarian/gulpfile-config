@@ -241,7 +241,7 @@ function rollupOutput(item) {
 		name: item.name || null,
 		globals: (typeof output === 'object' && output.globals) || item.globals || {},
 		sourcemap: true,
-		// minify: item.minify || false,
+		compact: item.minify || false,
 	};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);

@@ -188,6 +188,10 @@ function compileMjmlItem(item) {
 function compileRollup(item) {
 	const outputs = rollupOutput(item);
 	const minify = item.minify || outputs[0].minify;
+	if (item.output.minify !== undefined) {
+		delete item.output.minify;
+		item.output.compact = minify;
+	}
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(rollup(item))
