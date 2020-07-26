@@ -5,7 +5,7 @@ const { DEFAULT_EXTENSIONS } = require('@babel/core'),
 	rollupPluginCommonJs = require('@rollup/plugin-commonjs'),
 	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
 	rollupPluginLicense = require('rollup-plugin-license'),
-	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve'),
+	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').nodeResolve,
 	rollupPluginTypescript2 = require('rollup-plugin-typescript2'),
 	// rollupPluginTypescript = require('@rollup/plugin-typescript'),
 	through2 = require('through2'),
@@ -241,7 +241,7 @@ function rollupOutput(item) {
 		name: item.name || null,
 		globals: (typeof output === 'object' && output.globals) || item.globals || {},
 		sourcemap: true,
-		minify: item.minify || false,
+		// minify: item.minify || false,
 	};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);

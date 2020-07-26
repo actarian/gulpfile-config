@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.9
+ * @license gulpfile-config v1.0.0-beta.1
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -215,9 +215,11 @@ function watchEntries(callback) {
 
     if (matchedEntries.length) {
       if (typeof callback === 'function') {
-        matchedEntries.forEach(function (entry) {
-          return callback(path_, entry);
-        });
+        setTimeout(function () {
+          matchedEntries.forEach(function (entry) {
+            return callback(path_, entry);
+          });
+        }, 1);
       }
     }
   });
@@ -630,7 +632,7 @@ function mjml(item) {
         }
 
         var out = result.output.find(function (x) {
-          return x.isAsset;
+          return x.type === 'asset';
         });
         var newFilePath = path.format({
           dir: path.dirname(output.file),
@@ -720,7 +722,13 @@ function mjmlInput(item, path) {
   var plugins = [rollupPluginMjml({
     keepComments: item.minify ? false : true,
     minify: item.minify ? true : false,
-    beautify: item.minify ? false : true // validationLevel: item.validationLevel || 'strict',
+    minifyOptions: item.minify ? {
+      collapseWhitespace: true,
+      minifyCSS: false,
+      removeEmptyAttributes: true
+    } : {},
+    beautify: item.minify ? false : true,
+    validationLevel: 'soft' // validationLevel: item.validationLevel || 'strict',
 
   })].filter(function (x) {
     return x;
@@ -737,9 +745,7 @@ function mjmlOutput(item) {
   var input = item.input;
   var output = item.output;
   var outputs = Array.isArray(output) ? output : [output];
-  var default_ = {
-    minify: item.minify || false
-  };
+  var default_ = {};
   return outputs.map(function (x) {
     var output = Object.assign({}, default_);
 
@@ -759,7 +765,8 @@ var mjml_1 = {
   mjmlOutput: mjmlOutput
 };
 
-var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS;
+var DEFAULT_EXTENSIONS = core.DEFAULT_EXTENSIONS,
+    rollupPluginNodeResolve = pluginNodeResolve.nodeResolve;
 var setEntry$3 = watch_1.setEntry; // map object storing rollup cache objects for each input file
 
 var rollupCache$1 = new Map();
@@ -941,7 +948,7 @@ function rollupInput(item) {
   // which external modules to include in the bundle
   // https://github.com/rollup/rollup-plugin-node-resolve#usage
   // import node modules
-  output.format === 'cjs' ? null : pluginNodeResolve(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
+  output.format === 'cjs' ? null : rollupPluginNodeResolve(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
   // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
   pluginCommonjs({
     exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined
@@ -994,8 +1001,8 @@ function rollupOutput(item) {
     format: 'iife',
     name: item.name || null,
     globals: typeof output === 'object' && output.globals || item.globals || {},
-    sourcemap: true,
-    minify: item.minify || false
+    sourcemap: true // minify: item.minify || false,
+
   };
   return outputs.map(function (x) {
     var output = Object.assign({}, default_);
@@ -1642,6 +1649,11 @@ function serve(done) {
       path: '/',
       livereload: true
     }, service$5.config.server || {});
+
+    if (options.https && options.https.cert) {
+      options.https.cert = fs.readFileSync(options.https.cert);
+    }
+
     options.fallback = options.path + "index.html";
     var middleware = middleware_({
       logger: options.log ? logger : undefined,
@@ -1802,7 +1814,8 @@ function watchTask(done, filters) {
     if (entry === CONFIG_PATH$1) {
       config$1 = getConfig$1();
       return series$1(compileTask, bundleTask, copyTask$1);
-    }
+    } // console.log('watchEntries', entry);
+
 
     config$1.target.compile.forEach(function (x) {
       // console.log(entry, x.input);
@@ -1810,7 +1823,7 @@ function watchTask(done, filters) {
         var ext = path.extname(entry);
 
         if (!filters || filters.indexOf(ext) !== -1) {
-          logger('Watch', path_, '>', entry); // console.log('compile', ext, x);
+          logger('Watch Compile', path_, '>', entry); // console.log('compile', ext, x);
 
           compile$1(x, ext);
         }
@@ -1826,7 +1839,7 @@ function watchTask(done, filters) {
         var ext = path.extname(entry);
 
         if (!filters || filters.indexOf(ext) !== -1) {
-          logger('Watch', path_, '>', entry); // console.log('bundle', ext, x);
+          logger('Watch Bundle', path_, '>', entry); // console.log('bundle', ext, x);
 
           bundle$1(x, ext);
         }

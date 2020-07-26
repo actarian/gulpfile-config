@@ -3,6 +3,12 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-beta.1] - 2020-07-26
+### Fixing
+- Updating dependancies
+
+---
+
 ## [1.0.0-alpha.9] - 2020-03-11
 ### Fixing
 - Fixing regexp

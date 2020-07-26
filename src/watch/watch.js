@@ -28,7 +28,9 @@ function watchEntries(callback) {
 		});
 		if (matchedEntries.length) {
 			if (typeof callback === 'function') {
-				matchedEntries.forEach(entry => callback(path_, entry));
+				setTimeout(() => {
+					matchedEntries.forEach(entry => callback(path_, entry));
+				}, 1);
 			}
 		}
 	});

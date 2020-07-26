@@ -28,7 +28,7 @@ function mjml(item) {
 				if (!result) {
 					return;
 				}
-				const out = result.output.find(x => x.isAsset);
+				const out = result.output.find(x => x.type === 'asset');
 				const newFilePath = path.format({
 					dir: path.dirname(output.file),
 					name: path.basename(file.path, path.extname(file.path)),
@@ -95,7 +95,13 @@ function mjmlInput(item, path) {
 		rollupPluginMjml({
 			keepComments: item.minify ? false : true,
 			minify: item.minify ? true : false,
+			minifyOptions: item.minify ? {
+				collapseWhitespace: true,
+				minifyCSS: false,
+				removeEmptyAttributes: true
+			} : {},
 			beautify: item.minify ? false : true,
+			validationLevel: 'soft',
 			// validationLevel: item.validationLevel || 'strict',
 		}),
 	].filter(x => x);
@@ -111,9 +117,7 @@ function mjmlOutput(item) {
 	const input = item.input;
 	const output = item.output;
 	const outputs = Array.isArray(output) ? output : [output];
-	const default_ = {
-		minify: item.minify || false,
-	};
+	const default_ = {};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);
 		if (typeof x === 'string') {

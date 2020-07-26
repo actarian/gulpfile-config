@@ -6,7 +6,7 @@ Gulp bundler utility with `gulpfile-config.json`
 
 ## Requirements
 
-### [Gulp CLI](https://github.com/angular/angular-cli) version 4.0.0
+### [Gulp CLI](https://gulpjs.com/docs/en/getting-started/quick-start) version 4.0.0
 ```
 npm install gulp-cli -g
 ```
