@@ -18,9 +18,27 @@
 					"minify": true
         },
 				{
-					"input": "test/js/main.js",
-					"output": "docs/js/main.js",
+					"input": "test/js/es6/main.js",
+					"output": "docs/js/es6/main.js",
 					"minify": true
+        },
+				{
+					"input": "test/js/ts/main.ts",
+					"output": [{
+						"file": "docs/js/cjs/",
+						"format": "cjs"
+          }, {
+						"file": "docs/js/esm/",
+						"format": "esm"
+          }, {
+						"file": "docs/js/umd/main.js",
+						"format": "umd",
+						"minify": true
+          }, {
+						"file": "docs/js/iife/main.js",
+						"format": "iife",
+						"minify": true
+          }]
         }
       ],
 			"bundle": []

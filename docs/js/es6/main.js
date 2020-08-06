@@ -4,4 +4,4 @@
  * License: MIT
  */
 
-(function(){'use strict';document.querySelector('.output').innerHTML = "I'm an es6 module!";}());
+(function(){'use strict';document.querySelector('.output-es6').innerHTML = "I'm an es6 module!";}());
