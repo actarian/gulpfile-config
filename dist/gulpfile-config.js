@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.13
+ * @license gulpfile-config v1.0.0-alpha.14
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1617,13 +1617,14 @@ function copyTask(done) {
 
 function copyItemTask(item) {
   var skip = item.input.length === 1 && item.input[0] === item.output;
+  var base = item.base || (typeof item.input === 'string' && item.input.indexOf('**/*.*') !== -1 ? item.input.split('**/*.*')[0] : '.');
   return src$2(item.input, {
-    base: '.',
+    base: base,
     allowEmpty: true,
     sourcemaps: false
-  }).pipe(gulpPlumber()).pipe(gulpRename({
+  }).pipe(gulpPlumber()).pipe(gulpIf(base === '.', gulpRename({
     dirname: item.output
-  })).pipe(gulpIf(!skip, dest$2('.'))).pipe(tfs_1(skip)).on('end', function () {
+  }))).pipe(gulpIf(!skip, base === '.' ? dest$2('.') : dest$2(item.output))).pipe(tfs_1(skip)).on('end', function () {
     return logger('Bundle', item.output);
   });
 }

@@ -3,6 +3,12 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-alpha.14] - 2020-09-01
+### Fixing
+- Copy
+
+---
+
 ## [1.0.0-alpha.13] - 2020-08-06
 ### Fixing
 - Updating dependancies

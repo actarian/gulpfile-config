@@ -29,10 +29,12 @@ function copyTask(done) {
 
 function copyItemTask(item) {
 	const skip = item.input.length === 1 && item.input[0] === item.output;
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: false })
+	const base = item.base ||
+		(typeof item.input === 'string' && item.input.indexOf('**/*.*') !== -1 ? item.input.split('**/*.*')[0] : '.');
+	return src(item.input, { base, allowEmpty: true, sourcemaps: false })
 		.pipe(gulpPlumber())
-		.pipe(gulpRename({ dirname: item.output }))
-		.pipe(gulpIf(!skip, dest('.')))
+		.pipe(gulpIf(base === '.', gulpRename({ dirname: item.output })))
+		.pipe(gulpIf(!skip, base === '.' ? dest('.') : dest(item.output)))
 		.pipe(tfsCheckout(skip))
 		.on('end', () => log('Bundle', item.output));
 }
