@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.15
+ * @license gulpfile-config v1.0.0-alpha.16
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -833,20 +833,21 @@ var mjml_1 = {
   mjmlOutput: mjmlOutput
 };
 
-var DEFAULT_EXTENSIONS = require$$0__default$3["default"].DEFAULT_EXTENSIONS,
-    path$3 = require$$1__default$2["default"],
-    rollup$1 = require$$1__default$4["default"],
-    rollupPluginBabel = require$$3__default$4["default"].babel,
-    rollupPluginCommonJs = require$$4__default$2["default"],
-    rollupPluginSourcemaps = require$$5__default["default"],
-    rollupPluginLicense = require$$6__default["default"],
-    rollupPluginNodeResolve = require$$7__default["default"],
-    rollupPluginTypescript2 = require$$8__default["default"],
-    through2$1 = require$$3__default$2["default"],
-    typescript$2 = require$$10__default["default"],
-    vinyl = require$$3__default$3["default"],
-    vinylSourcemapsApply = require$$4__default$1["default"];
-var log$5 = logger.exports;
+var DEFAULT_EXTENSIONS = require$$0__default$3["default"].DEFAULT_EXTENSIONS;
+var path$3 = require$$1__default$2["default"];
+var rollup$1 = require$$1__default$4["default"];
+var rollupPluginBabel = require$$3__default$4["default"];
+var rollupPluginCommonJs = require$$4__default$2["default"];
+var rollupPluginSourcemaps = require$$5__default["default"];
+var rollupPluginLicense = require$$6__default["default"];
+var rollupPluginNodeResolve = require$$7__default["default"];
+var rollupPluginTypescript2 = require$$8__default["default"];
+var through2$1 = require$$3__default$2["default"];
+var typescript$2 = require$$10__default["default"];
+var vinyl = require$$3__default$3["default"];
+var vinylSourcemapsApply = require$$4__default$1["default"];
+var log$5 = logger.exports; // const { service } = require('../config/config');
+
 var setEntry$3 = watch_1.setEntry; // map object storing rollup cache objects for each input file
 
 var rollupCache = new Map();
@@ -1083,7 +1084,7 @@ function rollupInput(item) {
   output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
   // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
   rollupPluginCommonJs(rollupPluginCommonJsOptions), // Compile TypeScript files
-  path$3.extname(item.input) === '.ts' ? rollupPluginTypescript2(rollupPluginTypescript2Options) : null, rollupPluginBabel(rollupPluginBabelOptions), rollupPluginLicense(rollupPluginLicenseOptions)].filter(function (x) {
+  path$3.extname(item.input) === '.ts' ? rollupPluginTypescript2(rollupPluginTypescript2Options) : null, rollupPluginBabel.babel ? rollupPluginBabel.babel(rollupPluginBabelOptions) : rollupPluginBabel(rollupPluginBabelOptions), rollupPluginLicense(rollupPluginLicenseOptions)].filter(function (x) {
     return x;
   }); // console.log('plugins', rollupPluginBabelOptions, plugins);
 

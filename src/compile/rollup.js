@@ -1,21 +1,18 @@
-const { DEFAULT_EXTENSIONS } = require('@babel/core'),
-	path = require('path'),
-	rollup = require('rollup'),
-	rollupPluginBabel = require('@rollup/plugin-babel').babel,
-	rollupPluginCommonJs = require('@rollup/plugin-commonjs'),
-	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
-	rollupPluginLicense = require('rollup-plugin-license'),
-	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve'),
-	rollupPluginTypescript2 = require('rollup-plugin-typescript2'),
-	// rollupPluginTypescript = require('@rollup/plugin-typescript'),
-	through2 = require('through2'),
-	typescript = require('typescript'),
-	vinyl = require('vinyl'),
-	vinylSourcemapsApply = require('vinyl-sourcemaps-apply');
-
+const { DEFAULT_EXTENSIONS } = require('@babel/core');
+const path = require('path');
+const rollup = require('rollup');
+const rollupPluginBabel = require('@rollup/plugin-babel');
+const rollupPluginCommonJs = require('@rollup/plugin-commonjs');
+const rollupPluginSourcemaps = require('rollup-plugin-sourcemaps');
+const rollupPluginLicense = require('rollup-plugin-license');
+const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve');
+const rollupPluginTypescript2 = require('rollup-plugin-typescript2');
+const through2 = require('through2');
+const typescript = require('typescript');
+const vinyl = require('vinyl');
+const vinylSourcemapsApply = require('vinyl-sourcemaps-apply');
 const log = require('../logger/logger');
-const { service } = require('../config/config');
-
+// const { service } = require('../config/config');
 const { setEntry } = require('../watch/watch');
 
 // map object storing rollup cache objects for each input file
@@ -236,7 +233,7 @@ function rollupInput(item) {
 		rollupPluginCommonJs(rollupPluginCommonJsOptions),
 		// Compile TypeScript files
 		path.extname(item.input) === '.ts' ? rollupPluginTypescript2(rollupPluginTypescript2Options) : null,
-		rollupPluginBabel(rollupPluginBabelOptions),
+		rollupPluginBabel.babel ? rollupPluginBabel.babel(rollupPluginBabelOptions) : rollupPluginBabel(rollupPluginBabelOptions),
 		rollupPluginLicense(rollupPluginLicenseOptions),
 	].filter(x => x);
 	// console.log('plugins', rollupPluginBabelOptions, plugins);

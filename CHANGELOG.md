@@ -3,7 +3,7 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
-## [1.0.0-alpha.15] - 2022-02-04
+## [1.0.0-alpha.16] - 2022-02-07
 ### Fixing
 - Watch matchPaths
 ### Modified
