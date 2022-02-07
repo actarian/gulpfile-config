@@ -1,7 +1,7 @@
 const { DEFAULT_EXTENSIONS } = require('@babel/core'),
 	path = require('path'),
 	rollup = require('rollup'),
-	rollupPluginBabel = require('rollup-plugin-babel'),
+	rollupPluginBabel = require('@rollup/plugin-babel').babel,
 	rollupPluginCommonJs = require('@rollup/plugin-commonjs'),
 	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
 	rollupPluginLicense = require('rollup-plugin-license'),
@@ -89,34 +89,31 @@ function rollup_(item) {
 				log.error('rollup', error);
 			});
 		};
-
 		rollup.rollup(inputOptions).then(bundle => {
-				// console.log(bundle);
-				const outputs = rollupOutput(item);
-				// console.log(outputs);
-				if (inputOptions.cache !== false) {
-					rollupCache.set(inputOptions.input, bundle);
-				}
-				return Promise.all(outputs.map((output, i) => rollupGenerate(bundle, output, i)));
-				// return bundle.write(outputs);
-			})
-			.then((results) => {
-				results.forEach(x => {
-					const outputs = x.output;
-					outputs.forEach(x => {
-						setEntry(inputOptions.input, Object.keys(x.modules));
-					});
+			// console.log(bundle);
+			const outputs = rollupOutput(item);
+			// console.log(outputs);
+			if (inputOptions.cache !== false) {
+				rollupCache.set(inputOptions.input, bundle);
+			}
+			return Promise.all(outputs.map((output, i) => rollupGenerate(bundle, output, i)));
+			// return bundle.write(outputs);
+		}).then((results) => {
+			results.forEach(x => {
+				const outputs = x.output;
+				outputs.forEach(x => {
+					setEntry(inputOptions.input, Object.keys(x.modules));
 				});
-				callback(null, file); // pass file to gulp and end stream
-			})
-			.catch(error => {
-				log.error('rollup', error);
-				if (inputOptions.cache !== false) {
-					rollupCache.delete(inputOptions.input);
-				}
-				throw (error);
-				return callback(null, file);
 			});
+			callback(null, file); // pass file to gulp and end stream
+		}).catch(error => {
+			log.error('rollup', error);
+			if (inputOptions.cache !== false) {
+				rollupCache.delete(inputOptions.input);
+			}
+			throw (error);
+			return callback(null, file);
+		});
 	});
 }
 
@@ -125,6 +122,7 @@ function rollupInput(item) {
 	const presetEnvOptions = {
 		modules: false,
 		loose: true,
+		useBuiltIns: false,
 	};
 	if (output.format === 'esm') {
 		presetEnvOptions.targets = {
@@ -168,6 +166,58 @@ function rollupInput(item) {
 	};
 	// const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
 	// console.log('watchGlob', watchGlob);
+	const globals = Object.keys(output.globals);
+	const externals = globals.length ? globals : (item.external || []);
+	const rollupPluginCommonJsOptions = {
+		exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined,
+	};
+	const rollupPluginTypescript2Options = {
+		typescript: typescript,
+		tsconfigDefaults: tsconfigDefaults,
+		tsconfig: 'tsconfig.json',
+		tsconfigOverride: tsconfigOverride,
+		rollupCommonJSResolveHack: true,
+		clean: true,
+		check: false,
+	};
+	const rollupPluginBabelOptions = {
+		extensions: [
+			...DEFAULT_EXTENSIONS,
+			'.ts',
+			'.tsx'
+		],
+		presets: [
+			['@babel/preset-env', presetEnvOptions],
+			// ['@babel/preset-typescript', { modules: false, loose: true }]
+		],
+		plugins: [
+			['@babel/plugin-proposal-class-properties', { loose: true }],
+			'@babel/plugin-proposal-object-rest-spread',
+			// '@babel/plugin-transform-runtime'
+		],
+		exclude: ['node_modules/**'], // transpile only source code
+		/*
+		exclude: 1 ? [] : ['node_modules/**', ...(Array.isArray(item.input) ? item.input : [item.input]).map(x => {
+			if (x.indexOf('node_modules') === 0) {
+				x = x.split('/');
+				while (x.length > 2) {
+					x.pop();
+				}
+				return `!${x.join('/')}/**`;
+			} else {
+				return null;
+			}
+		}).filter(x => x)],
+		*/
+		comments: output.format !== 'iife',
+		babelHelpers: 'bundled',
+		// babelrc: false,
+	};
+	const rollupPluginLicenseOptions = {
+		banner: `@license <%= pkg.name %> v<%= pkg.version %>
+		(c) <%= moment().format('YYYY') %> <%= pkg.author %>
+		License: <%= pkg.license %>`,
+	};
 	const plugins = [
 		// Resolve source maps to the original source
 		rollupPluginSourcemaps(),
@@ -175,53 +225,25 @@ function rollupInput(item) {
 		// which external modules to include in the bundle
 		// https://github.com/rollup/rollup-plugin-node-resolve#usage
 		// import node modules
+		/*
+		output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)({
+			resolveOnly: [new RegExp(`^(?!(${externals.join('$|')}$))`)]
+		}),
+		*/
 		output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)(),
 		// exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
 		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-		rollupPluginCommonJs({
-			exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined,
-		}),
+		rollupPluginCommonJs(rollupPluginCommonJsOptions),
 		// Compile TypeScript files
-		path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
-			typescript: typescript,
-			tsconfigDefaults: tsconfigDefaults,
-			tsconfig: 'tsconfig.json',
-			tsconfigOverride: tsconfigOverride,
-			rollupCommonJSResolveHack: true,
-			clean: true,
-			check: false,
-		}) : null,
-		rollupPluginBabel({
-			extensions: [
-				...DEFAULT_EXTENSIONS,
-				'.ts',
-				'.tsx'
-			],
-			presets: [
-				['@babel/preset-env', presetEnvOptions],
-				// ['@babel/preset-typescript', { modules: false, loose: true }]
-			],
-			plugins: [
-				'@babel/plugin-proposal-class-properties',
-				'@babel/plugin-proposal-object-rest-spread'
-			],
-			exclude: 'node_modules/**', // only transpile our source code
-			comments: output.format !== 'iife',
-			// babelHelpers: 'bundled', // only for version 5
-			// babelrc: false,
-		}),
-		rollupPluginLicense({
-			banner: `@license <%= pkg.name %> v<%= pkg.version %>
-			(c) <%= moment().format('YYYY') %> <%= pkg.author %>
-			License: <%= pkg.license %>`,
-		}),
-
+		path.extname(item.input) === '.ts' ? rollupPluginTypescript2(rollupPluginTypescript2Options) : null,
+		rollupPluginBabel(rollupPluginBabelOptions),
+		rollupPluginLicense(rollupPluginLicenseOptions),
 	].filter(x => x);
-	const globals = Object.keys(output.globals);
+	// console.log('plugins', rollupPluginBabelOptions, plugins);
 	const input = {
 		input: item.input,
 		plugins: plugins,
-		external: globals.length ? globals : (item.external || []),
+		external: externals,
 		cache: false, // !! break babel if true
 		treeshake: true,
 		/*

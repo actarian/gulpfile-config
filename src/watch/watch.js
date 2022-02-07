@@ -1,4 +1,5 @@
 const path = require('path');
+const minimatch = require("minimatch");
 const { watch } = require('gulp');
 
 const log = require('../logger/logger');
@@ -67,7 +68,8 @@ function sameRoot(p1, p2) {
 }
 
 function matchPaths(p1, p2) {
-	return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
+	return minimatch(p1, p2);
+	// return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
 }
 
 module.exports = {

@@ -27,11 +27,11 @@ function watchTask(done, filters) {
 		}
 		// console.log('watchEntries', entry);
 		config.target.compile.forEach(x => {
-			// console.log(entry, x.input);
-			if (matchPaths(entry, x.input)) {
-				const ext = path.extname(entry);
+			// console.log('watchTask', entry, x.input, filters);
+			if (matchPaths(path_, x.input)) {
+				const ext = path.extname(path_);
 				if (!filters || filters.indexOf(ext) !== -1) {
-					log('Watch Compile', path_, '>', entry);
+					log('Watch Compile', path_, '>', x.input);
 					// console.log('compile', ext, x);
 					compile(x, ext);
 				}
