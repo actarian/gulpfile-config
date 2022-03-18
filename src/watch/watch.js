@@ -4,7 +4,7 @@ const { watch } = require('gulp');
 
 const log = require('../logger/logger');
 const entries = {};
-const cwd = process.cwd();
+const cwd = path.normalize(process.cwd());
 
 let watcher;
 
@@ -12,40 +12,48 @@ function watchEntries(callback) {
 	if (watcher && typeof watcher.close === 'function') {
 		watcher.close();
 	}
-	watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', (path_) => {
+	watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', (entry) => {
+		let normalizedEntry = normalize(entry);
 		const matchedEntries = Object.keys(entries).filter(key => {
 			const imports = entries[key];
+			// console.log(normalizedEntry, imports);
 			if (isGlob(key)) {
-				return isExt(path_, imports) && sameRoot(path_, key);
+				return isExt(normalizedEntry, imports) && sameRoot(normalizedEntry, key);
 			} else if (isPath(imports)) {
-				return matchPaths(key, path_);
+				return matchPaths(key, normalizedEntry);
 			} else {
 				const found = imports.find(i => {
-					// console.log(i, path_);
-					return matchPaths(i, path_);
-				}) || matchPaths(key, path_);
+					return matchPaths(i, normalizedEntry);
+				}) || matchPaths(key, normalizedEntry);
 				return found;
 			}
 		});
+		// console.log(matchedEntries);
 		if (matchedEntries.length) {
 			if (typeof callback === 'function') {
 				setTimeout(() => {
-					matchedEntries.forEach(entry => callback(path_, entry));
+					matchedEntries.forEach(x => callback(x, entry));
 				}, 1);
 			}
 		}
 	});
 }
 
+function normalize(entry) {
+	entry = path.normalize(entry).replace(cwd, '').replace(/\\/g, '/'); //.replace(/^\//, '');
+	if (entry.indexOf('/') !== 0) {
+		entry = '/' + entry;
+	}
+	return entry;
+}
+
 function setEntry(entry, imports) {
-	// console.log(entry, imports);
-	entry = entry.replace(cwd, '');
+	entry = normalize(entry);
 	if (typeof imports === 'string') {
-		//
-		entries[entry] = imports;
+		entries[entry] = normalize(imports);
 	} else if (imports) {
 		imports = Array.isArray(imports) ? imports : [imports];
-		imports = imports.map(x => x.replace(cwd, ''));
+		imports = imports.map(x => normalize(x));
 		entries[entry] = imports;
 	}
 	// log('watch', entry, imports);
@@ -68,7 +76,7 @@ function sameRoot(p1, p2) {
 }
 
 function matchPaths(p1, p2) {
-	return minimatch(p1, p2);
+	return minimatch(normalize(p1), normalize(p2));
 	// return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
 }
 

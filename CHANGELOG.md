@@ -3,7 +3,7 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
-## [1.0.0-alpha.17] - 2022-03-18
+## [1.0.0-alpha.18] - 2022-03-18
 ### Modified
 - dart sass compiler
 - Updating dependencies

@@ -4,4 +4,7 @@
  * License: MIT
  */
 
-(function(){'use strict';document.querySelector('.output-ts').innerHTML = "I'm a typescript module!";})();
+(function(){'use strict';var Sub = function Sub() {
+  console.log('>Sub.ts');
+};document.querySelector('.output-ts').innerHTML = "I'm a typescript module!";
+new Sub();})();

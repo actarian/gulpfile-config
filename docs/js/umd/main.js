@@ -4,8 +4,10 @@
  * License: MIT
  */
 
-(function(f){typeof define==='function'&&define.amd?define(f):f();})((function(){'use strict';/**
+(function(f){typeof define==='function'&&define.amd?define(f):f();})((function(){'use strict';var Sub = function Sub() {
+  console.log('>Sub.ts');
+};/**
  * main es6 module example
  */
-
-document.querySelector('.output-ts').innerHTML = "I'm a typescript module!";}));
+document.querySelector('.output-ts').innerHTML = "I'm a typescript module!";
+new Sub();}));

@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.17
+ * @license gulpfile-config v1.0.0-alpha.18
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -8,7 +8,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var require$$1$2 = require('path');
+var require$$1$1 = require('path');
 var require$$3$1 = require('gulp');
 var require$$0$4 = require('cssnano');
 var require$$1$5 = require('gulp-autoprefixer');
@@ -21,7 +21,7 @@ var require$$7$1 = require('gulp-plumber');
 var require$$8$1 = require('gulp-postcss');
 var require$$9 = require('gulp-rename');
 var require$$10$1 = require('gulp-terser');
-var require$$1$1 = require('minimatch');
+var require$$1$2 = require('minimatch');
 var require$$0 = require('ansi-gray');
 var require$$1 = require('color-support');
 var require$$2 = require('console');
@@ -49,7 +49,7 @@ var require$$1$6 = require('url');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-var require$$1__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$1$2);
+var require$$1__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$1$1);
 var require$$3__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$3$1);
 var require$$0__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$0$4);
 var require$$1__default$5 = /*#__PURE__*/_interopDefaultLegacy(require$$1$5);
@@ -62,7 +62,7 @@ var require$$7__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$7$1);
 var require$$8__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$8$1);
 var require$$9__default = /*#__PURE__*/_interopDefaultLegacy(require$$9);
 var require$$10__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$10$1);
-var require$$1__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$1$1);
+var require$$1__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$1$2);
 var require$$0__default = /*#__PURE__*/_interopDefaultLegacy(require$$0);
 var require$$1__default = /*#__PURE__*/_interopDefaultLegacy(require$$1);
 var require$$2__default = /*#__PURE__*/_interopDefaultLegacy(require$$2);
@@ -230,11 +230,11 @@ logger.exports.dir = dir;
 logger.exports.warn = warn;
 logger.exports.error = error;
 
-var path$6 = require$$1__default$2["default"];
-var minimatch = require$$1__default$1["default"];
+var path$6 = require$$1__default$1["default"];
+var minimatch = require$$1__default$2["default"];
 var watch$1 = require$$3__default$1["default"].watch;
 var entries = {};
-var cwd = process.cwd();
+var cwd = path$6.normalize(process.cwd());
 var watcher;
 
 function watchEntries$1(callback) {
@@ -242,28 +242,28 @@ function watchEntries$1(callback) {
     watcher.close();
   }
 
-  watcher = watch$1(['**/*.*', '!node_modules/**/*.*']).on('change', function (path_) {
+  watcher = watch$1(['**/*.*', '!node_modules/**/*.*']).on('change', function (entry) {
+    var normalizedEntry = normalize(entry);
     var matchedEntries = Object.keys(entries).filter(function (key) {
-      var imports = entries[key];
+      var imports = entries[key]; // console.log(normalizedEntry, imports);
 
       if (isGlob(key)) {
-        return isExt(path_, imports) && sameRoot(path_, key);
+        return isExt(normalizedEntry, imports) && sameRoot(normalizedEntry, key);
       } else if (isPath(imports)) {
-        return matchPaths$1(key, path_);
+        return matchPaths$1(key, normalizedEntry);
       } else {
         var found = imports.find(function (i) {
-          // console.log(i, path_);
-          return matchPaths$1(i, path_);
-        }) || matchPaths$1(key, path_);
+          return matchPaths$1(i, normalizedEntry);
+        }) || matchPaths$1(key, normalizedEntry);
         return found;
       }
-    });
+    }); // console.log(matchedEntries);
 
     if (matchedEntries.length) {
       if (typeof callback === 'function') {
         setTimeout(function () {
-          matchedEntries.forEach(function (entry) {
-            return callback(path_, entry);
+          matchedEntries.forEach(function (x) {
+            return callback(x, entry);
           });
         }, 1);
       }
@@ -271,17 +271,25 @@ function watchEntries$1(callback) {
   });
 }
 
+function normalize(entry) {
+  entry = path$6.normalize(entry).replace(cwd, '').replace(/\\/g, '/'); //.replace(/^\//, '');
+
+  if (entry.indexOf('/') !== 0) {
+    entry = '/' + entry;
+  }
+
+  return entry;
+}
+
 function setEntry$6(entry, imports) {
-  // console.log(entry, imports);
-  entry = entry.replace(cwd, '');
+  entry = normalize(entry);
 
   if (typeof imports === 'string') {
-    //
-    entries[entry] = imports;
+    entries[entry] = normalize(imports);
   } else if (imports) {
     imports = Array.isArray(imports) ? imports : [imports];
     imports = imports.map(function (x) {
-      return x.replace(cwd, '');
+      return normalize(x);
     });
     entries[entry] = imports;
   } // log('watch', entry, imports);
@@ -305,7 +313,7 @@ function sameRoot(p1, p2) {
 }
 
 function matchPaths$1(p1, p2) {
-  return minimatch(p1, p2); // return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
+  return minimatch(normalize(p1), normalize(p2)); // return path.normalize(p1).indexOf(path.normalize(p2)) !== -1;
 }
 
 var watch_1 = {
@@ -501,7 +509,7 @@ function tfsCheckout$3(skip) {
 var tfs_1 = tfsCheckout$3;
 
 var sass$1 = require$$0__default$2["default"];
-var path$5 = require$$1__default$2["default"];
+var path$5 = require$$1__default$1["default"];
 var through2$3 = require$$3__default$2["default"];
 var log$7 = logger.exports;
 var setEntry$5 = watch_1.setEntry;
@@ -616,7 +624,7 @@ var dartSass = {
   sass: compileSass
 };
 
-var path$4 = require$$1__default$2["default"],
+var path$4 = require$$1__default$1["default"],
     rollup$2 = require$$1__default$4["default"],
     rollupPluginMjml = require$$2__default$3["default"],
     through2$2 = require$$3__default$2["default"],
@@ -787,7 +795,7 @@ var mjml_1 = {
 };
 
 var DEFAULT_EXTENSIONS = require$$0__default$3["default"].DEFAULT_EXTENSIONS;
-var path$3 = require$$1__default$2["default"];
+var path$3 = require$$1__default$1["default"];
 var rollup$1 = require$$1__default$4["default"];
 var rollupPluginBabel = require$$3__default$3["default"];
 var rollupPluginCommonJs = require$$4__default$2["default"];
@@ -1089,7 +1097,7 @@ var rollup_1 = {
 };
 
 var typescript$1 = require$$10__default["default"],
-    path$2 = require$$1__default$2["default"],
+    path$2 = require$$1__default$1["default"],
     through2 = require$$3__default$2["default"];
 var getObject = json.getObject,
     extend = json.extend;
@@ -1276,7 +1284,7 @@ var cssnano$1 = require$$0__default$4["default"],
     gulpPostcss$1 = require$$8__default$1["default"],
     gulpRename$2 = require$$9__default["default"],
     gulpTerser$1 = require$$10__default$1["default"],
-    path$1 = require$$1__default$2["default"];
+    path$1 = require$$1__default$1["default"];
 var dest$2 = require$$3__default$1["default"].dest,
     parallel$3 = require$$3__default$1["default"].parallel,
     series$1 = require$$3__default$1["default"].series,
@@ -1891,7 +1899,7 @@ var serve_1$1 = {
   serve: serve$1
 };
 
-var path = require$$1__default$2["default"];
+var path = require$$1__default$1["default"];
 var parallel = require$$3__default$1["default"].parallel,
     series = require$$3__default$1["default"].series;
 var compile = compile_1$1.compile,
@@ -1928,6 +1936,7 @@ function watchTask(done, filters) {
 
     config.target.compile.forEach(function (x) {
       // console.log('watchTask', entry, x.input, filters);
+      // console.log('watchTask', path_, x.input, matchPaths(path_, x.input));
       if (matchPaths(path_, x.input)) {
         var ext = path.extname(path_);
 

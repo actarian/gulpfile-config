@@ -28,6 +28,7 @@ function watchTask(done, filters) {
 		// console.log('watchEntries', entry);
 		config.target.compile.forEach(x => {
 			// console.log('watchTask', entry, x.input, filters);
+			// console.log('watchTask', path_, x.input, matchPaths(path_, x.input));
 			if (matchPaths(path_, x.input)) {
 				const ext = path.extname(path_);
 				if (!filters || filters.indexOf(ext) !== -1) {
