@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.16
+ * @license gulpfile-config v1.0.0-alpha.17
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -8,4 +8,4 @@
  * main es6 module example
  */
 
-document.querySelector('.output-ts').innerHTML = "I'm an ts module!";}));
+document.querySelector('.output-ts').innerHTML = "I'm a typescript module!";}));

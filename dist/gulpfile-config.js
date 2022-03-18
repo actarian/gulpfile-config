@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.16
+ * @license gulpfile-config v1.0.0-alpha.17
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -13,7 +13,7 @@ var require$$3$1 = require('gulp');
 var require$$0$4 = require('cssnano');
 var require$$1$5 = require('gulp-autoprefixer');
 var require$$2$4 = require('gulp-connect');
-var require$$3$5 = require('gulp-filter');
+var require$$3$4 = require('gulp-filter');
 var require$$4$3 = require('gulp-html-extend');
 var require$$5$1 = require('gulp-htmlmin');
 var require$$1$3 = require('gulp-if');
@@ -31,19 +31,19 @@ var require$$0$1 = require('fs');
 var require$$2$1 = require('process');
 var require$$2$2 = require('tfs');
 var require$$3$2 = require('through2');
-var require$$0$2 = require('node-sass');
-var require$$3$3 = require('vinyl');
-var require$$4$1 = require('vinyl-sourcemaps-apply');
+var require$$0$2 = require('sass');
 var require$$1$4 = require('rollup');
 var require$$2$3 = require('rollup-plugin-mjml');
+var require$$4$1 = require('vinyl');
 var require$$0$3 = require('@babel/core');
-var require$$3$4 = require('@rollup/plugin-babel');
+var require$$3$3 = require('@rollup/plugin-babel');
 var require$$4$2 = require('@rollup/plugin-commonjs');
 var require$$5 = require('rollup-plugin-sourcemaps');
 var require$$6 = require('rollup-plugin-license');
 var require$$7 = require('@rollup/plugin-node-resolve');
 var require$$8 = require('rollup-plugin-typescript2');
 var require$$10 = require('typescript');
+var require$$12 = require('vinyl-sourcemaps-apply');
 var require$$7$2 = require('gulp-concat');
 var require$$1$6 = require('url');
 
@@ -54,7 +54,7 @@ var require$$3__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$3$1);
 var require$$0__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$0$4);
 var require$$1__default$5 = /*#__PURE__*/_interopDefaultLegacy(require$$1$5);
 var require$$2__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$2$4);
-var require$$3__default$5 = /*#__PURE__*/_interopDefaultLegacy(require$$3$5);
+var require$$3__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$3$4);
 var require$$4__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$4$3);
 var require$$5__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$5$1);
 var require$$1__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$1$3);
@@ -73,18 +73,18 @@ var require$$2__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$2$1);
 var require$$2__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$2$2);
 var require$$3__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$3$2);
 var require$$0__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$0$2);
-var require$$3__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$3$3);
-var require$$4__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$4$1);
 var require$$1__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$1$4);
 var require$$2__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$2$3);
+var require$$4__default$1 = /*#__PURE__*/_interopDefaultLegacy(require$$4$1);
 var require$$0__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$0$3);
-var require$$3__default$4 = /*#__PURE__*/_interopDefaultLegacy(require$$3$4);
+var require$$3__default$3 = /*#__PURE__*/_interopDefaultLegacy(require$$3$3);
 var require$$4__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$4$2);
 var require$$5__default = /*#__PURE__*/_interopDefaultLegacy(require$$5);
 var require$$6__default = /*#__PURE__*/_interopDefaultLegacy(require$$6);
 var require$$7__default = /*#__PURE__*/_interopDefaultLegacy(require$$7);
 var require$$8__default = /*#__PURE__*/_interopDefaultLegacy(require$$8);
 var require$$10__default = /*#__PURE__*/_interopDefaultLegacy(require$$10);
+var require$$12__default = /*#__PURE__*/_interopDefaultLegacy(require$$12);
 var require$$7__default$2 = /*#__PURE__*/_interopDefaultLegacy(require$$7$2);
 var require$$1__default$6 = /*#__PURE__*/_interopDefaultLegacy(require$$1$6);
 
@@ -500,14 +500,13 @@ function tfsCheckout$3(skip) {
 
 var tfs_1 = tfsCheckout$3;
 
-var nodeSass = require$$0__default$2["default"],
-    path$5 = require$$1__default$2["default"],
-    through2$3 = require$$3__default$2["default"],
-    vinylSourcemapsApply$1 = require$$4__default$1["default"];
+var sass$1 = require$$0__default$2["default"];
+var path$5 = require$$1__default$2["default"];
+var through2$3 = require$$3__default$2["default"];
 var log$7 = logger.exports;
 var setEntry$5 = watch_1.setEntry;
 
-function sass$1(options, sync) {
+function compileSass(options, sync) {
   options = Object.assign({}, options);
   return through2$3.obj(function (file, enc, callback) {
     // eslint-disable-line consistent-return
@@ -557,43 +556,8 @@ function sass$1(options, sync) {
       options.sourceMapContents = true;
     }
 
-    var filePush = function filePush(sassObj) {
-      var sassMap;
-      var sassMapFile;
-      var sassFileSrc;
-      var sassFileSrcPath;
-      var sourceFileIndex; // Build Source Maps!
-
-      if (sassObj.map) {
-        // Transform map into JSON
-        sassMap = JSON.parse(sassObj.map.toString()); // Grab the stdout and transform it into stdin
-
-        sassMapFile = sassMap.file.replace(/^stdout$/, 'stdin'); // Grab the base file name that's being worked on
-
-        sassFileSrc = file.relative; // Grab the path portion of the file that's being worked on
-
-        sassFileSrcPath = path$5.dirname(sassFileSrc);
-
-        if (sassFileSrcPath) {
-          // Prepend the path to all files in the sources array except the file that's being worked on
-          sourceFileIndex = sassMap.sources.indexOf(sassMapFile);
-          sassMap.sources = sassMap.sources.map(function (source, index) {
-            // eslint-disable-line arrow-body-style
-            return index === sourceFileIndex ? source : path$5.join(sassFileSrcPath, source);
-          });
-        } // Remove 'stdin' from souces and replace with filenames!
-
-
-        sassMap.sources = sassMap.sources.filter(function (src) {
-          return src !== 'stdin' && src;
-        }); // Replace the map file with the original file name (but new extension)
-
-        sassMap.file = replaceExtension(sassFileSrc, '.css'); // Apply the map
-
-        vinylSourcemapsApply$1(file, sassMap);
-      }
-
-      file.contents = sassObj.css; // eslint-disable-line no-param-reassign
+    var filePush = function filePush(object) {
+      file.contents = Buffer.from(object.css, 'utf8'); // eslint-disable-line no-param-reassign
 
       file.path = replaceExtension(file.path, '.css'); // eslint-disable-line no-param-reassign
 
@@ -603,19 +567,30 @@ function sass$1(options, sync) {
     if (sync !== true) {
       var _callback = function _callback(error, object) {
         // eslint-disable-line consistent-return
+        // console.log(object);
         if (error) {
           return log$7.error('sass', error); // return callback(null, null);
         }
 
-        setEntry$5(input, object.stats.includedFiles);
+        setEntry$5(input, object.loadedUrls.map(function (x) {
+          return path$5.normalize(x.pathname.substring(1));
+        }));
         filePush(object);
-      };
+      }; // console.log(options);
 
-      nodeSass.render(options, _callback);
+
+      sass$1.compileAsync(options.file).then(function (object) {
+        _callback(null, object);
+      }, function (error) {
+        _callback(error);
+      }); // nodeSass.render(options, callback);
     } else {
       try {
-        var object = nodeSass.renderSync(options);
-        setEntry$5(input, object.stats.includedFiles);
+        var object = sass$1.compile(options.file); // const object = nodeSass.renderSync(options);
+
+        setEntry$5(input, object.loadedUrls.map(function (x) {
+          return path$5.normalize(x.pathname.substring(1));
+        }));
         filePush(object);
       } catch (error) {
         return log$7.error('sass', error); // return callback(null, null);
@@ -624,8 +599,8 @@ function sass$1(options, sync) {
   });
 }
 
-sass$1.sync = function (options) {
-  return sass$1(options, true);
+compileSass.sync = function (options) {
+  return compileSass(options, true);
 };
 
 function replaceExtension(filePath, ext) {
@@ -636,38 +611,16 @@ function replaceExtension(filePath, ext) {
   });
   return filePath;
 }
-/*
 
-const errorM = (error) => {
-	const filePath = (error.file === 'stdin' ? file.path : error.file) || file.path;
-	const relativePath = path.relative(process.cwd(), filePath);
-	const message = [chalk.underline(relativePath), error.formatted].join('\n');
-
-	error.messageFormatted = message; // eslint-disable-line no-param-reassign
-	error.messageOriginal = error.message; // eslint-disable-line no-param-reassign
-	error.message = stripAnsi(message); // eslint-disable-line no-param-reassign
-	error.relativePath = relativePath; // eslint-disable-line no-param-reassign
-
-	return callback(new pluginError('sass', error));
-};
-
-sass.logError = function logError(error) {
-	const message = new pluginError('sass', error.messageFormatted).toString();
-	process.stderr.write(`${message}\n`);
-	this.emit('end');
-};
-*/
-
-
-var sass_1 = {
-  sass: sass$1
+var dartSass = {
+  sass: compileSass
 };
 
 var path$4 = require$$1__default$2["default"],
     rollup$2 = require$$1__default$4["default"],
     rollupPluginMjml = require$$2__default$3["default"],
     through2$2 = require$$3__default$2["default"],
-    vinyl$1 = require$$3__default$3["default"];
+    vinyl$1 = require$$4__default$1["default"];
 var log$6 = logger.exports;
 var setEntry$4 = watch_1.setEntry;
 var rollupCache$1 = new Map();
@@ -836,7 +789,7 @@ var mjml_1 = {
 var DEFAULT_EXTENSIONS = require$$0__default$3["default"].DEFAULT_EXTENSIONS;
 var path$3 = require$$1__default$2["default"];
 var rollup$1 = require$$1__default$4["default"];
-var rollupPluginBabel = require$$3__default$4["default"];
+var rollupPluginBabel = require$$3__default$3["default"];
 var rollupPluginCommonJs = require$$4__default$2["default"];
 var rollupPluginSourcemaps = require$$5__default["default"];
 var rollupPluginLicense = require$$6__default["default"];
@@ -844,8 +797,8 @@ var rollupPluginNodeResolve = require$$7__default["default"];
 var rollupPluginTypescript2 = require$$8__default["default"];
 var through2$1 = require$$3__default$2["default"];
 var typescript$2 = require$$10__default["default"];
-var vinyl = require$$3__default$3["default"];
-var vinylSourcemapsApply = require$$4__default$1["default"];
+var vinyl = require$$4__default$1["default"];
+var vinylSourcemapsApply = require$$12__default["default"];
 var log$5 = logger.exports; // const { service } = require('../config/config');
 
 var setEntry$3 = watch_1.setEntry; // map object storing rollup cache objects for each input file
@@ -1315,7 +1268,7 @@ var typescript_1 = {
 var cssnano$1 = require$$0__default$4["default"],
     gulpAutoprefixer = require$$1__default$5["default"],
     gulpConnect$1 = require$$2__default$4["default"],
-    gulpFilter$1 = require$$3__default$5["default"],
+    gulpFilter$1 = require$$3__default$4["default"],
     gulpHtmlExtend = require$$4__default$3["default"],
     gulpHtmlMin = require$$5__default$1["default"],
     gulpIf$2 = require$$1__default$3["default"],
@@ -1332,7 +1285,7 @@ var setEntry$2 = watch_1.setEntry;
 var log$4 = logger.exports;
 var service$3 = config$1.service;
 var tfsCheckout$2 = tfs_1;
-var sass = sass_1.sass;
+var sass = dartSass.sass;
 var mjml = mjml_1.mjml;
 var rollup = rollup_1.rollup,
     rollupOutput = rollup_1.rollupOutput;
@@ -1613,7 +1566,7 @@ var compile_1$1 = {
 };
 
 var cssnano = require$$0__default$4["default"],
-    gulpFilter = require$$3__default$5["default"],
+    gulpFilter = require$$3__default$4["default"],
     gulpIf$1 = require$$1__default$3["default"],
     gulpPlumber$1 = require$$7__default$1["default"],
     gulpPostcss = require$$8__default$1["default"],

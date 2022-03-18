@@ -49,37 +49,37 @@ function sass(options, sync) {
 			options.omitSourceMapUrl = true;
 			options.sourceMapContents = true;
 		}
-		const filePush = (sassObj) => {
-			let sassMap;
-			let sassMapFile;
-			let sassFileSrc;
-			let sassFileSrcPath;
+		const filePush = (object) => {
+			let map;
+			let mapFile;
+			let srcFile;
+			let dirFile;
 			let sourceFileIndex;
 			// Build Source Maps!
-			if (sassObj.map) {
+			if (object.map) {
 				// Transform map into JSON
-				sassMap = JSON.parse(sassObj.map.toString());
+				map = JSON.parse(object.map.toString());
 				// Grab the stdout and transform it into stdin
-				sassMapFile = sassMap.file.replace(/^stdout$/, 'stdin');
+				mapFile = map.file.replace(/^stdout$/, 'stdin');
 				// Grab the base file name that's being worked on
-				sassFileSrc = file.relative;
+				srcFile = file.relative;
 				// Grab the path portion of the file that's being worked on
-				sassFileSrcPath = path.dirname(sassFileSrc);
-				if (sassFileSrcPath) {
+				dirFile = path.dirname(srcFile);
+				if (dirFile) {
 					// Prepend the path to all files in the sources array except the file that's being worked on
-					sourceFileIndex = sassMap.sources.indexOf(sassMapFile);
-					sassMap.sources = sassMap.sources.map((source, index) => { // eslint-disable-line arrow-body-style
-						return index === sourceFileIndex ? source : path.join(sassFileSrcPath, source);
+					sourceFileIndex = map.sources.indexOf(mapFile);
+					map.sources = map.sources.map((source, index) => { // eslint-disable-line arrow-body-style
+						return index === sourceFileIndex ? source : path.join(dirFile, source);
 					});
 				}
 				// Remove 'stdin' from souces and replace with filenames!
-				sassMap.sources = sassMap.sources.filter(src => src !== 'stdin' && src);
+				map.sources = map.sources.filter(src => src !== 'stdin' && src);
 				// Replace the map file with the original file name (but new extension)
-				sassMap.file = replaceExtension(sassFileSrc, '.css');
+				map.file = replaceExtension(srcFile, '.css');
 				// Apply the map
-				vinylSourcemapsApply(file, sassMap);
+				vinylSourcemapsApply(file, map);
 			}
-			file.contents = sassObj.css; // eslint-disable-line no-param-reassign
+			file.contents = object.css; // eslint-disable-line no-param-reassign
 			file.path = replaceExtension(file.path, '.css'); // eslint-disable-line no-param-reassign
 			callback(null, file);
 		};

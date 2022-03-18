@@ -18,7 +18,7 @@ const { setEntry } = require('../watch/watch');
 const log = require('../logger/logger');
 const { service } = require('../config/config');
 const tfsCheckout = require('../tfs/tfs');
-const { sass } = require('./sass');
+const { sass } = require('./dart-sass');
 const { mjml } = require('./mjml');
 
 const { rollup, rollupOutput } = require('./rollup');
