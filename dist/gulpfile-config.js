@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.18
+ * @license gulpfile-config v1.0.0-alpha.19
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -245,7 +245,7 @@ function watchEntries$1(callback) {
   watcher = watch$1(['**/*.*', '!node_modules/**/*.*']).on('change', function (entry) {
     var normalizedEntry = normalize(entry);
     var matchedEntries = Object.keys(entries).filter(function (key) {
-      var imports = entries[key]; // console.log(normalizedEntry, imports);
+      var imports = entries[key]; // console.log(normalizedEntry, key, isGlob(key), imports);
 
       if (isGlob(key)) {
         return isExt(normalizedEntry, imports) && sameRoot(normalizedEntry, key);
@@ -285,7 +285,7 @@ function setEntry$6(entry, imports) {
   entry = normalize(entry);
 
   if (typeof imports === 'string') {
-    entries[entry] = normalize(imports);
+    entries[entry] = isGlob(entry) ? imports : normalize(imports);
   } else if (imports) {
     imports = Array.isArray(imports) ? imports : [imports];
     imports = imports.map(function (x) {
@@ -1433,6 +1433,7 @@ function compileHtml$1(done) {
 }
 
 function compileHtmlItem(item) {
+  // console.log('compileHtemlItem', item.input, path.extname(item.input));
   setEntry$2(item.input, path$1.extname(item.input));
   return src$2(item.input, {
     base: '.',

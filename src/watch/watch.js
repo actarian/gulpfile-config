@@ -16,7 +16,7 @@ function watchEntries(callback) {
 		let normalizedEntry = normalize(entry);
 		const matchedEntries = Object.keys(entries).filter(key => {
 			const imports = entries[key];
-			// console.log(normalizedEntry, imports);
+			// console.log(normalizedEntry, key, isGlob(key), imports);
 			if (isGlob(key)) {
 				return isExt(normalizedEntry, imports) && sameRoot(normalizedEntry, key);
 			} else if (isPath(imports)) {
@@ -50,7 +50,7 @@ function normalize(entry) {
 function setEntry(entry, imports) {
 	entry = normalize(entry);
 	if (typeof imports === 'string') {
-		entries[entry] = normalize(imports);
+		entries[entry] = isGlob(entry) ? imports : normalize(imports);
 	} else if (imports) {
 		imports = Array.isArray(imports) ? imports : [imports];
 		imports = imports.map(x => normalize(x));

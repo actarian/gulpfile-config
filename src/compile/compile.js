@@ -141,6 +141,7 @@ function compileHtml(done) {
 }
 
 function compileHtmlItem(item) {
+	// console.log('compileHtemlItem', item.input, path.extname(item.input));
 	setEntry(item.input, path.extname(item.input));
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
