@@ -145,7 +145,7 @@ function compileHtmlItem(item) {
 	setEntry(item.input, path.extname(item.input));
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
-		.pipe(gulpHtmlExtend({ annotations: true, verbose: false }))
+		.pipe(gulpHtmlExtend({ annotations: true, verbose: false, ...item.options }))
 		.pipe(gulpIf(item.minify, gulpHtmlMin({ collapseWhitespace: true })))
 		.pipe(gulpRename(function(path) {
 			return {
