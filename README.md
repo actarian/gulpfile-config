@@ -32,7 +32,10 @@ As in the example [gulpfile-config.json](https://github.com/actarian/gulp-4-bund
         {
           "input": "test/*.html",
           "output": "docs/",
-          "minify": true
+          "minify": true,
+          "options": {
+            "root": "/"
+          }
         },
         {
           "input": "test/templates/emails/*.mjml",

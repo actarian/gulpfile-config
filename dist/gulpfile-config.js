@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.19
+ * @license gulpfile-config v1.0.0-alpha.20
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1475,6 +1475,7 @@ function compileHtml$1(done) {
 
 function compileHtmlItem(item) {
   // console.log('compileHtemlItem', item.input, path.extname(item.input));
+  console.log(item.options);
   setEntry$2(item.input, path$1.extname(item.input));
   return src$2(item.input, {
     base: '.',

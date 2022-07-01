@@ -2,7 +2,7 @@
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
 	"name": "gulpfile-config",
 	"description": "Gulp bundler utility with gulpfile-config.json",
-	"version": "1.0.0-alpha.19",
+	"version": "1.0.0-alpha.20",
 	"engines": {
 		"node": "^17 || ^16 || ^15.0.1 || ^14 || ^12"
 	},

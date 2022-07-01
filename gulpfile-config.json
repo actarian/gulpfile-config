@@ -5,47 +5,58 @@
 				{
 					"input": "test/*.html",
 					"output": "docs/",
-					"minify": true
-        },
+					"minify": true,
+          "options": {
+            "root": "/"
+          }
+				},
 				{
 					"input": "test/sub/*.html",
 					"output": "docs/",
-					"minify": true
-        },
+					"minify": true,
+          "options": {
+            "root": "/"
+          }
+				},
 				{
 					"input": "test/templates/emails/*.mjml",
 					"output": "docs/templates/emails/",
 					"minify": false
-        },
+				},
 				{
 					"input": "test/css/main.scss",
 					"output": "docs/css/main.css",
 					"minify": true
-        },
+				},
 				{
 					"input": "test/js/es6/main.js",
 					"output": "docs/js/es6/main.js",
 					"minify": true
-        },
+				},
 				{
 					"input": "test/js/ts/main.ts",
-					"output": [{
-						"file": "docs/js/cjs/",
-						"format": "cjs"
-          }, {
-						"file": "docs/js/esm/",
-						"format": "esm"
-          }, {
-						"file": "docs/js/umd/main.js",
-						"format": "umd",
-						"minify": true
-          }, {
-						"file": "docs/js/iife/main.js",
-						"format": "iife",
-						"minify": true
-          }]
-        }
-      ],
+					"output": [
+						{
+							"file": "docs/js/cjs/",
+							"format": "cjs"
+						},
+						{
+							"file": "docs/js/esm/",
+							"format": "esm"
+						},
+						{
+							"file": "docs/js/umd/main.js",
+							"format": "umd",
+							"minify": true
+						},
+						{
+							"file": "docs/js/iife/main.js",
+							"format": "iife",
+							"minify": true
+						}
+					]
+				}
+			],
 			"bundle": []
 		},
 		"dist": {
@@ -56,8 +67,8 @@
 						"file": "dist/gulpfile-config.js",
 						"format": "cjs"
 					}
-        }
-      ],
+				}
+			],
 			"bundle": []
 		}
 	},
