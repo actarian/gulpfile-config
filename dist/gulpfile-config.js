@@ -1475,7 +1475,6 @@ function compileHtml$1(done) {
 
 function compileHtmlItem(item) {
   // console.log('compileHtemlItem', item.input, path.extname(item.input));
-  console.log(item.options);
   setEntry$2(item.input, path$1.extname(item.input));
   return src$2(item.input, {
     base: '.',
