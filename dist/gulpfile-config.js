@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.20
+ * @license gulpfile-config v1.0.0-alpha.21
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1636,7 +1636,7 @@ function bundle$1(item, ext, done) {
   var task;
 
   switch (ext) {
-    case '.scss':
+    case '.css':
       task = bundleCssItem(item);
       break;
 
@@ -1992,7 +1992,7 @@ function watchTask(done, filters) {
     config.target.bundle.forEach(function (x) {
       var inputs = Array.isArray(x.input) ? x.input : [x.input];
       var item = inputs.find(function (x) {
-        return matchPaths(path_, x);
+        return matchPaths(entry, x);
       });
 
       if (item) {

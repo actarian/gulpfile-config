@@ -3,6 +3,11 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-alpha.21] - 2022-07-04
+### Fixing
+- bundle watch
+---
+
 ## [1.0.0-alpha.20] - 2022-07-01
 ### Modified
 - html-extend options

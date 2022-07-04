@@ -17,7 +17,7 @@ const { setEntry } = require('../watch/watch');
 function bundle(item, ext, done) {
 	let task;
 	switch (ext) {
-		case '.scss':
+		case '.css':
 			task = bundleCssItem(item);
 			break;
 		case '.js':

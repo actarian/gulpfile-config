@@ -40,7 +40,7 @@ function watchTask(done, filters) {
 		});
 		config.target.bundle.forEach(x => {
 			const inputs = Array.isArray(x.input) ? x.input : [x.input];
-			const item = inputs.find(x => matchPaths(path_, x));
+			const item = inputs.find(x => matchPaths(entry, x));
 			if (item) {
 				const ext = path.extname(entry);
 				if (!filters || filters.indexOf(ext) !== -1) {
