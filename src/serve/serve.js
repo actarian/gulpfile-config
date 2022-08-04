@@ -154,7 +154,7 @@ function getLogger(options) {
 		// eslint-disable-next-line no-console
 		return console.log.bind(console);
 	}
-	return function() {};
+	return function() { };
 }
 
 module.exports = {

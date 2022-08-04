@@ -61,7 +61,7 @@ function compileScssItem(item) {
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(sass({
-			includePaths: ['./node_modules/', __dirname + '/node_modules', 'node_modules'],
+			loadPaths: ['node_modules'], // ['./node_modules/', __dirname + '/node_modules', 'node_modules']
 		}).on('compile:scss.error', (error) => {
 			log.error('compile:scss', error);
 		}))

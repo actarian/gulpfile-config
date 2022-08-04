@@ -30,14 +30,14 @@ function compileSass(options, sync) {
 			options.indentedSyntax = true;
 		}
 		// Ensure file's parent directory in the include path
-		if (options.includePaths) {
-			if (typeof options.includePaths === 'string') {
-				options.includePaths = [options.includePaths];
+		if (options.loadPaths) {
+			if (typeof options.loadPaths === 'string') {
+				options.loadPaths = [options.loadPaths];
 			}
 		} else {
-			options.includePaths = [];
+			options.loadPaths = [];
 		}
-		options.includePaths.unshift(path.dirname(file.path));
+		options.loadPaths.unshift(path.dirname(file.path));
 		// Generate Source Maps if plugin source-map present
 		if (file.sourceMap) {
 			options.sourceMap = file.path;
@@ -59,8 +59,7 @@ function compileSass(options, sync) {
 				setEntry(input, object.loadedUrls.map(x => path.normalize(x.pathname.substring(1))));
 				filePush(object);
 			};
-			// console.log(options);
-			sass.compileAsync(options.file).then(object => {
+			sass.compileAsync(options.file, { loadPaths: options.loadPaths }).then(object => {
 				callback(null, object);
 			}, error => {
 				callback(error);
@@ -68,7 +67,7 @@ function compileSass(options, sync) {
 			// nodeSass.render(options, callback);
 		} else {
 			try {
-				const object = sass.compile(options.file);
+				const object = sass.compile(options.file, { loadPaths: options.loadPaths });
 				// const object = nodeSass.renderSync(options);
 				setEntry(input, object.loadedUrls.map(x => path.normalize(x.pathname.substring(1))));
 				filePush(object);

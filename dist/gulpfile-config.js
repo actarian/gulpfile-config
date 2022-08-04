@@ -1,5 +1,5 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.21
+ * @license gulpfile-config v1.0.0-alpha.22
  * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -589,15 +589,15 @@ function compileSass(options, sync) {
     } // Ensure file's parent directory in the include path
 
 
-    if (options.includePaths) {
-      if (typeof options.includePaths === 'string') {
-        options.includePaths = [options.includePaths];
+    if (options.loadPaths) {
+      if (typeof options.loadPaths === 'string') {
+        options.loadPaths = [options.loadPaths];
       }
     } else {
-      options.includePaths = [];
+      options.loadPaths = [];
     }
 
-    options.includePaths.unshift(path$5.dirname(file.path)); // Generate Source Maps if plugin source-map present
+    options.loadPaths.unshift(path$5.dirname(file.path)); // Generate Source Maps if plugin source-map present
 
     if (file.sourceMap) {
       options.sourceMap = file.path;
@@ -625,17 +625,20 @@ function compileSass(options, sync) {
           return path$5.normalize(x.pathname.substring(1));
         }));
         filePush(object);
-      }; // console.log(options);
+      };
 
-
-      sass$1.compileAsync(options.file).then(function (object) {
+      sass$1.compileAsync(options.file, {
+        loadPaths: options.loadPaths
+      }).then(function (object) {
         _callback(null, object);
       }, function (error) {
         _callback(error);
       }); // nodeSass.render(options, callback);
     } else {
       try {
-        var object = sass$1.compile(options.file); // const object = nodeSass.renderSync(options);
+        var object = sass$1.compile(options.file, {
+          loadPaths: options.loadPaths
+        }); // const object = nodeSass.renderSync(options);
 
         setEntry$5(input, object.loadedUrls.map(function (x) {
           return path$5.normalize(x.pathname.substring(1));
@@ -1387,7 +1390,8 @@ function compileScssItem(item) {
     allowEmpty: true,
     sourcemaps: true
   }).pipe(gulpPlumber$2()).pipe(sass({
-    includePaths: ['./node_modules/', __dirname + '/node_modules', 'node_modules']
+    loadPaths: ['node_modules'] // ['./node_modules/', __dirname + '/node_modules', 'node_modules']
+
   }).on('compile:scss.error', function (error) {
     log$4.error('compile:scss', error);
   })).pipe(gulpAutoprefixer()).pipe(gulpRename$2(item.output)).pipe(tfsCheckout$2()).pipe(dest$2('.', item.minify ? null : {
