@@ -1,6 +1,6 @@
 /**
- * @license gulpfile-config v1.0.0-alpha.22
- * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
+ * @license gulpfile-config v1.0.0-alpha.23
+ * (c) 2023 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
@@ -313,7 +313,8 @@ function watchEntries$1(callback) {
 }
 
 function normalize(entry) {
-  entry = path$6.normalize(entry).replace(cwd, '').replace(/\\/g, '/'); //.replace(/^\//, '');
+  var directory = path$6.normalize(cwd).replace(' ', '%20');
+  entry = path$6.normalize(entry).replace(' ', '%20').replace(directory, '').replace(/\\/g, '/'); //.replace(/^\//, '');
 
   if (entry.indexOf('/') !== 0) {
     entry = '/' + entry;
@@ -492,17 +493,17 @@ function getConfig$1() {
 }
 /*
 function configWatcher(callback) {
-	const configWatch = watch(CONFIG_PATH, function config(done) {
-		// config = getConfig();
-		if (typeof callback === 'function') {
-			return callback(done);
-		}
-	}).on('change', logWatch);
-	return [configWatch];
+  const configWatch = watch(CONFIG_PATH, function config(done) {
+    // config = getConfig();
+    if (typeof callback === 'function') {
+      return callback(done);
+    }
+  }).on('change', logWatch);
+  return [configWatch];
 }
 
 function logWatch(path, stats) {
-	log('Changed', path);
+  log('Changed', path);
 }
 */
 
@@ -1057,15 +1058,15 @@ function rollupInput(item) {
 
     /*
     exclude: 1 ? [] : ['node_modules/**', ...(Array.isArray(item.input) ? item.input : [item.input]).map(x => {
-    	if (x.indexOf('node_modules') === 0) {
-    		x = x.split('/');
-    		while (x.length > 2) {
-    			x.pop();
-    		}
-    		return `!${x.join('/')}/**`;
-    	} else {
-    		return null;
-    	}
+      if (x.indexOf('node_modules') === 0) {
+        x = x.split('/');
+        while (x.length > 2) {
+          x.pop();
+        }
+        return `!${x.join('/')}/**`;
+      } else {
+        return null;
+      }
     }).filter(x => x)],
     */
     comments: output.format !== 'iife',
@@ -1083,7 +1084,7 @@ function rollupInput(item) {
 
   /*
   output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)({
-  	resolveOnly: [new RegExp(`^(?!(${externals.join('$|')}$))`)]
+    resolveOnly: [new RegExp(`^(?!(${externals.join('$|')}$))`)]
   }),
   */
   output.format === 'cjs' ? null : (typeof rollupPluginNodeResolve === 'function' ? rollupPluginNodeResolve : rollupPluginNodeResolve.nodeResolve)(), // exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
@@ -1102,7 +1103,7 @@ function rollupInput(item) {
     treeshake: true
     /*
     watch: {
-    	include: watchGlob,
+      include: watchGlob,
     },
     */
 
@@ -1543,11 +1544,11 @@ function compileRollup(item) {
   }).pipe(gulpPlumber$2()).pipe(rollup(item))
   /*
   .pipe(gulpRename(function(file) {
-  	const output = outputs.find(x => {
-  		// console.log('file', x.file, file.basename, x.file.indexOf(file.basename));
-  		return x.file.indexOf(file.basename) !== -1;
-  	});
-  	file.dirname = path.dirname(output.file);
+    const output = outputs.find(x => {
+      // console.log('file', x.file, file.basename, x.file.indexOf(file.basename));
+      return x.file.indexOf(file.basename) !== -1;
+    });
+    file.dirname = path.dirname(output.file);
   }))
   */
   .pipe(tfsCheckout$2()).pipe(dest$2('.', minify ? null : {
@@ -1853,10 +1854,10 @@ function middleware_(options) {
       }
       /*
       logger(
-      	'Not rewriting',
-      	req.method,
-      	req.url,
-      	'because the client prefers JSON.'
+        'Not rewriting',
+        req.method,
+        req.url,
+        'because the client prefers JSON.'
       );
       return next();
       */
@@ -2011,16 +2012,16 @@ function watchTask(done, filters) {
     });
     /*
     config.target.copy.forEach(x => {
-    	const inputs = Array.isArray(x.input) ? x.input : [x.input];
-    	const item = inputs.find(x => matchPaths(path_, x));
-    	if (item) {
-    		const ext = path.extname(entry);
-    		if (!filters || filters.indexOf(ext) !== -1) {
-    			log('Watch', path_, '>', entry);
-    			// console.log('copy', ext, x);
-    			copy(x, ext, done);
-    		}
-    	}
+      const inputs = Array.isArray(x.input) ? x.input : [x.input];
+      const item = inputs.find(x => matchPaths(path_, x));
+      if (item) {
+      const ext = path.extname(entry);
+      if (!filters || filters.indexOf(ext) !== -1) {
+        log('Watch', path_, '>', entry);
+        // console.log('copy', ext, x);
+        copy(x, ext, done);
+      }
+      }
     });
     */
   });

@@ -19,61 +19,61 @@ const compileJsTask = parallel(compileJs, compileTs);
 const bundleTask = parallel(bundleCss, bundleJs);
 
 function watchTask(done, filters) {
-	setEntry(CONFIG_PATH, CONFIG_PATH);
-	watchEntries((path_, entry) => {
-		if (entry === CONFIG_PATH) {
-			config = getConfig();
-			return series(compileTask, bundleTask, copyTask);
-		}
-		// console.log('watchEntries', entry);
-		config.target.compile.forEach(x => {
-			// console.log('watchTask', entry, x.input, filters);
-			// console.log('watchTask', path_, x.input, matchPaths(path_, x.input));
-			if (matchPaths(path_, x.input)) {
-				const ext = path.extname(path_);
-				if (!filters || filters.indexOf(ext) !== -1) {
-					log('Watch Compile', path_, '>', x.input);
-					// console.log('compile', ext, x);
-					compile(x, ext);
-				}
-			}
-		});
-		config.target.bundle.forEach(x => {
-			const inputs = Array.isArray(x.input) ? x.input : [x.input];
-			const item = inputs.find(x => matchPaths(entry, x));
-			if (item) {
-				const ext = path.extname(entry);
-				if (!filters || filters.indexOf(ext) !== -1) {
-					log('Watch Bundle', path_, '>', entry);
-					// console.log('bundle', ext, x);
-					bundle(x, ext);
-				}
-			}
-		});
-		/*
-		config.target.copy.forEach(x => {
-			const inputs = Array.isArray(x.input) ? x.input : [x.input];
-			const item = inputs.find(x => matchPaths(path_, x));
-			if (item) {
-				const ext = path.extname(entry);
-				if (!filters || filters.indexOf(ext) !== -1) {
-					log('Watch', path_, '>', entry);
-					// console.log('copy', ext, x);
-					copy(x, ext, done);
-				}
-			}
-		});
-		*/
-	});
-	done();
+  setEntry(CONFIG_PATH, CONFIG_PATH);
+  watchEntries((path_, entry) => {
+    if (entry === CONFIG_PATH) {
+      config = getConfig();
+      return series(compileTask, bundleTask, copyTask);
+    }
+    // console.log('watchEntries', entry);
+    config.target.compile.forEach(x => {
+      // console.log('watchTask', entry, x.input, filters);
+      // console.log('watchTask', path_, x.input, matchPaths(path_, x.input));
+      if (matchPaths(path_, x.input)) {
+        const ext = path.extname(path_);
+        if (!filters || filters.indexOf(ext) !== -1) {
+          log('Watch Compile', path_, '>', x.input);
+          // console.log('compile', ext, x);
+          compile(x, ext);
+        }
+      }
+    });
+    config.target.bundle.forEach(x => {
+      const inputs = Array.isArray(x.input) ? x.input : [x.input];
+      const item = inputs.find(x => matchPaths(entry, x));
+      if (item) {
+        const ext = path.extname(entry);
+        if (!filters || filters.indexOf(ext) !== -1) {
+          log('Watch Bundle', path_, '>', entry);
+          // console.log('bundle', ext, x);
+          bundle(x, ext);
+        }
+      }
+    });
+    /*
+    config.target.copy.forEach(x => {
+      const inputs = Array.isArray(x.input) ? x.input : [x.input];
+      const item = inputs.find(x => matchPaths(path_, x));
+      if (item) {
+      const ext = path.extname(entry);
+      if (!filters || filters.indexOf(ext) !== -1) {
+        log('Watch', path_, '>', entry);
+        // console.log('copy', ext, x);
+        copy(x, ext, done);
+      }
+      }
+    });
+    */
+  });
+  done();
 }
 
 function watchCssTask(done) {
-	return watchTask(done, ['.scss', '.css']);
+  return watchTask(done, ['.scss', '.css']);
 }
 
 function watchJsTask(done) {
-	return watchTask(done, ['.js', '.mjs', '.ts', '.tsx']);
+  return watchTask(done, ['.js', '.mjs', '.ts', '.tsx']);
 }
 
 exports.compile = compileTask;

@@ -3,6 +3,11 @@ All notable changes to the "gulpfile-config" library will be documented in this 
 
 ---
 
+## [1.0.0-alpha.23] - 2023-01-25
+### Fixing
+- watch directory
+---
+
 ## [1.0.0-alpha.22] - 2022-08-04
 ### Fixing
 - import sass from node_modules

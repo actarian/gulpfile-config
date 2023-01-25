@@ -1,71 +1,71 @@
 .page {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-	main {
-		width: 100%;
-		padding: 0;
-	}
+  main {
+    width: 100%;
+    padding: 0;
+  }
 
-	.header {
-		flex: 0 0 75px;
-		display: flex;
-		align-items: center;
-		padding: 20px;
+  .header {
+    flex: 0 0 75px;
+    display: flex;
+    align-items: center;
+    padding: 20px;
 
-		.brand {
-			font-size: 13px;
-			font-weight: 900;
-			flex: 1 1 auto;
-		}
+    .brand {
+      font-size: 13px;
+      font-weight: 900;
+      flex: 1 1 auto;
+    }
 
-		.btn--twitter,
-		.btn--github {
-			font-size: 20px;
-			margin-left: 10px;
+    .btn--twitter,
+    .btn--github {
+      font-size: 20px;
+      margin-left: 10px;
 
-			i {
-				color: $foreground;
-				transition: ease-in-out color 300ms;
-			}
+      i {
+        color: $foreground;
+        transition: ease-in-out color 300ms;
+      }
 
-			&:hover {
-				i {
-					color: $foreground-primary;
-				}
-			}
-		}
-	}
+      &:hover {
+        i {
+          color: $foreground-primary;
+        }
+      }
+    }
+  }
 
-	.content {
-		padding: 10px 20px 20px 20px;
-	}
+  .content {
+    padding: 10px 20px 20px 20px;
+  }
 
-	@include media-breakpoint-up(sm) {
-		background: #e0e0e0;
+  @include media-breakpoint-up(sm) {
+    background: #e0e0e0;
 
-		main {
-			display: flex;
-			flex-direction: column;
-			max-width: 375px;
-			height: 70vh;
-			border-radius: 3px;
-			box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
-			background: white;
-		}
+    main {
+      display: flex;
+      flex-direction: column;
+      max-width: 375px;
+      height: 70vh;
+      border-radius: 3px;
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+      background: white;
+    }
 
-	}
+  }
 
-	@include media-breakpoint-down(xs) {
-		background: white;
+  @include media-breakpoint-down(xs) {
+    background: white;
 
-		main {
-			min-height: 100vh;
-			// height: 100vh;
-			// height: fill-available;
-		}
+    main {
+      min-height: 100vh;
+      // height: 100vh;
+      // height: fill-available;
+    }
 
-	}
+  }
 
 }

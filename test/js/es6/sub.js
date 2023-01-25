@@ -1,7 +1,7 @@
 export class Sub {
 
-	constructor() {
-		console.log('>Sub.js');
-	}
+  constructor() {
+    console.log('>Sub.js');
+  }
 
 }
